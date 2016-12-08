@@ -13,7 +13,6 @@ public class ObstacleManager : MonoBehaviour {
     private Vector2 setVelocity;
     private List<Rigidbody2D> allObstacles = new List<Rigidbody2D>();
     private Vector2 obstacleVelocity = Vector2.zero;
-    private DateTime reproductionTime = DateTime.UtcNow;
     private Vector3 initialSize;
 
     private int spawnRate;
