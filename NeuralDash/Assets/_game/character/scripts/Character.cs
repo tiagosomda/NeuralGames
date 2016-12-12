@@ -24,6 +24,7 @@ public class Character : MonoBehaviour {
     Vector2 initialPosition;
 
     GameManager gm;
+    HUD gameHud;
 
     private double[] neuronInput = new double[3];
 
@@ -35,6 +36,7 @@ public class Character : MonoBehaviour {
         rb = GetComponent<Rigidbody2D>();
 
         gm = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
+        gameHud = GameObject.FindGameObjectWithTag("HUD").GetComponent<HUD>();
     }
 
     // Update is called once per frame
@@ -139,12 +141,12 @@ public class Character : MonoBehaviour {
 
     public void SetCharData(string text, Color color)
     {
-        CharData.PanelLeft(name + " : ", text, color);
+        gameHud.PanelLeft(name + " : ", text, color);
     }
 
     public void SetOtherData(string name, string value, Color color)
     {
-        CharData.PanelRight(name, value, color);
+        gameHud.PanelRight(name, value, color);
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -153,7 +155,7 @@ public class Character : MonoBehaviour {
         {
             return;
         }
-        score = gm.obstaclesOvercome;
+        score = gm.score;
         SetCharData("Score " + score, Color.black);
 
         isRunning = false;

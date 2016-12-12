@@ -40,6 +40,8 @@ public class Learner : MonoBehaviour
 
     private bool isSimulationRunning;
 
+    public HUD gameHud;
+
     int currentIteration = 0;
     public Genome genome;
 
@@ -47,6 +49,8 @@ public class Learner : MonoBehaviour
 
     public void Start()
     {
+        gameHud = GameObject.FindGameObjectWithTag("HUD").GetComponent<HUD>();
+
         isLearning = false;
 
         var input = 3;  // speed, distance, size
@@ -83,6 +87,9 @@ public class Learner : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.P))
         {
+
+            gameHud.ResetTopValues();
+
             SetCurrentGen(0);
             SetBestScore(0, 0, "---");
             StartLearning();
@@ -196,6 +203,8 @@ public class Learner : MonoBehaviour
     {
         SetCurrentGen(currentIteration);
 
+        gameHud.SetScore(0, false);
+
         if (currentIteration > 0)
         {
             var totalFfitness = ga.SortInFitnessOrder();
@@ -267,12 +276,12 @@ public class Learner : MonoBehaviour
 
     public void SetBestScore(int gen, int name, string score)
     {
-        CharData.PanelRight("BEST SCORE : ", score, Color.black);
+        gameHud.PanelRight("BEST SCORE : ", score, Color.black);
     }
 
     public void SetCurrentGen(int iteration)
     {
-        CharData.PanelRight("CURRENT GEN : ", iteration.ToString(), Color.black);
+        gameHud.SetIteration(iteration);
     }
 
 
@@ -330,14 +339,14 @@ public class Learner : MonoBehaviour
         }
     }
 
-    public static void SetDataItem(string name, string value)
+    public void SetDataItem(string name, string value)
     {
         SetDataItem(name, value, Color.black);
     }
 
-    public static void SetDataItem(string name, string value, Color color)
+    public void SetDataItem(string name, string value, Color color)
     {
-        CharData.PanelRight(name, value, color);
+        gameHud.PanelRight(name, value, color);
     }
 
     public static void SaveGenome(string name, int score, Genome genome)

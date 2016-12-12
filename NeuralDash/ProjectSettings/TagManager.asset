@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Obstacle
   - GameManager
+  - HUD
   layers:
   - Default
   - TransparentFX

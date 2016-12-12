@@ -7,7 +7,10 @@ public class GameManager : MonoBehaviour {
     public int initialVelocity = 10;
     public float velocityIncreatePerLevel = 1;
     public int levelRange = 0;
-    public int obstaclesOvercome = 0;
+    public int score = 0;
+    public int maxScore;
+
+    private HUD gameHud;
 
     //public GameObject GameTitle;
     //public GameObject RunningScreen;
@@ -32,6 +35,9 @@ public class GameManager : MonoBehaviour {
         {
             Debug.LogWarning("Missing ObstacleManager script on GameObject");
         }
+
+
+        gameHud = GameObject.FindGameObjectWithTag("HUD").GetComponent<HUD>();
     }
 	
 	// Update is called once per frame
@@ -59,12 +65,12 @@ public class GameManager : MonoBehaviour {
 
     public void ObstaclePassed()
     {
-        obstaclesOvercome += 1;
-        //SetScore();
+        score += 1;
+        SetScore();
         levelCountdown--;
         if(obstacleManager.GetSpawnRate() > 500)
         {
-            var rate = spawnRate - (obstaclesOvercome * 10);
+            var rate = spawnRate - (score * 10);
             if(rate < 500)
             {
                 rate = 500;
@@ -74,11 +80,22 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    //public void SetScore()
-    //{
-    //    Score.text = (obstaclesOvercome * 100).ToString();
-    //    ObstacleCountText.text = obstaclesOvercome.ToString();
-    //}
+    public void SetScore()
+    {
+        //score = score * 100;
+
+        gameHud.SetScore(score, score > maxScore);
+
+        if(score > maxScore)
+        {
+            maxScore = score;
+        }
+    }
+
+    public void SetIterationCount(int iteration)
+    {
+        gameHud.SetIteration(iteration);
+    }
 
     public void ResetGame()
     {
@@ -91,7 +108,7 @@ public class GameManager : MonoBehaviour {
         //GameOverScreen.SetActive(false);
         //SetScore();
 
-        obstaclesOvercome = 0;
+        score = 0;
         obstacleManager.SetObstacleSpeed(initialVelocity);
     }
 
