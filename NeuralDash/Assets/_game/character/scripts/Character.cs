@@ -97,7 +97,7 @@ public class Character : MonoBehaviour {
 
         SetInitialPosition();
 
-        //SetText("---", Color.white);
+        SetCharData("---", Color.black);
         isRunning = true;
     }
 
@@ -125,14 +125,26 @@ public class Character : MonoBehaviour {
         //bool crouch = action < 0.20;
 
         bool jump = action > 0.80;
-        
-        //string text = action.ToString();
-        //SetText(text, jump ? Color.cyan : Color.white);
+
+        string actionStr = jump ? "JUMP" : "RUN";
+
+        SetCharData(actionStr, Color.black);
 
         if (jump)
         {
             Jump();
         }
+    }
+
+
+    public void SetCharData(string text, Color color)
+    {
+        CharData.PanelLeft(name + " : ", text, color);
+    }
+
+    public void SetOtherData(string name, string value, Color color)
+    {
+        CharData.PanelRight(name, value, color);
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -141,10 +153,10 @@ public class Character : MonoBehaviour {
         {
             return;
         }
-        isRunning = false;
-
         score = gm.obstaclesOvercome;
-        //SetText("Score " + score, Color.red);
+        SetCharData("Score " + score, Color.black);
+
+        isRunning = false;
         this.gameObject.SetActive(false);
 
     }

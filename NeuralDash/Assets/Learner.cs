@@ -47,12 +47,6 @@ public class Learner : MonoBehaviour
 
     public void Start()
     {
-        data_names = new List<string>();
-        data_values = new List<Text>();
-
-        _DataItemPrefab = DataItemPrefab;
-        _DataItemParent = DataItemParent;
-
         isLearning = false;
 
         var input = 3;  // speed, distance, size
@@ -90,7 +84,7 @@ public class Learner : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.P))
         {
             SetCurrentGen(0);
-            //SetDataItem("BEST SCORE : ", "---");
+            SetBestScore(0, 0, "---");
             StartLearning();
             gm.ResetGame();
             isLearning = true;
@@ -273,12 +267,12 @@ public class Learner : MonoBehaviour
 
     public void SetBestScore(int gen, int name, string score)
     {
-        SetDataItem("BEST SCORE : ", score);
+        CharData.PanelRight("BEST SCORE : ", score, Color.black);
     }
 
     public void SetCurrentGen(int iteration)
     {
-        SetDataItem("CURRENT GEN : ", iteration.ToString());
+        CharData.PanelRight("CURRENT GEN : ", iteration.ToString(), Color.black);
     }
 
 
@@ -338,39 +332,12 @@ public class Learner : MonoBehaviour
 
     public static void SetDataItem(string name, string value)
     {
-        SetDataItem(name, value, Color.white);
+        SetDataItem(name, value, Color.black);
     }
 
     public static void SetDataItem(string name, string value, Color color)
     {
-
-        //if (!data_names.Contains(name))
-        //{
-        //    if (data_names == null)
-        //    {
-        //        data_names = new List<string>();
-        //        data_values = new List<Text>();
-        //    }
-        //
-        //    data_names.Add(name);
-        //
-        //    var item = Instantiate(_DataItemPrefab) as GameObject;
-        //
-        //    var data_n = item.transform.FindChild("Label").GetComponent<Text>();
-        //    var data_v = item.transform.FindChild("Value").GetComponent<Text>();
-        //
-        //    data_n.color = color;
-        //    data_v.color = color;
-        //
-        //    data_n.text = name;
-        //
-        //    data_values.Add(data_v);
-        //
-        //    item.transform.SetParent(_DataItemParent.transform);
-        //}
-        //
-        //var index = data_names.IndexOf(name);
-        //data_values[index].text = value;
+        CharData.PanelRight(name, value, color);
     }
 
     public static void SaveGenome(string name, int score, Genome genome)
