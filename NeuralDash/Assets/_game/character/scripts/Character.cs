@@ -3,6 +3,8 @@ using System.Collections;
 
 public class Character : MonoBehaviour {
 
+    public Sensor sensor;
+
     public float jumpForce = 10f;
     public bool isGrounded = true;
     public LayerMask whatIsGround;
@@ -14,11 +16,25 @@ public class Character : MonoBehaviour {
 
     private Transform groundCheck;
 
+    public bool isRunning;
+
+    private int score;
+
+    bool isInitPosSetOnce = false;
+    Vector2 initialPosition;
+
+    GameManager gm;
+
+    private double[] neuronInput = new double[3];
+
+
     public void Awake()
     {
         groundCheck = transform.Find("GroundCheck");
         animator = GetComponentInChildren<Animator>();
         rb = GetComponent<Rigidbody2D>();
+
+        gm = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
     }
 
     // Update is called once per frame
@@ -46,7 +62,6 @@ public class Character : MonoBehaviour {
         }
     }
 
-
     private void CheckGround()
     {
         isGrounded = false;
@@ -60,5 +75,77 @@ public class Character : MonoBehaviour {
                 isGrounded = true;
         }
         animator.SetBool("isGrounded", isGrounded);
+    }
+
+    public void SetInitialPosition()
+    {
+        if (!isInitPosSetOnce)
+        {
+            isInitPosSetOnce = true;
+            initialPosition = gameObject.transform.position;
+        }
+
+        gameObject.transform.position = initialPosition;
+    }
+
+    public void ResetSkipper()
+    {
+        this.gameObject.SetActive(true);
+
+        var rb = gameObject.GetComponent<Rigidbody2D>();
+        rb.velocity = Vector2.zero;
+
+        SetInitialPosition();
+
+        //SetText("---", Color.white);
+        isRunning = true;
+    }
+
+    public int GetScore()
+    {
+        return score;
+    }
+
+    public double[] GetSensorReading()
+    {
+        if (sensor.Data == null)
+        {
+            return null;
+        }
+
+        neuronInput[0] = sensor.Data.velocity;
+        neuronInput[1] = sensor.Data.distance;
+        neuronInput[2] = sensor.Data.dimension.x;
+
+        return neuronInput;
+    }
+
+    public void HandleNeuronOutput(float action)
+    {
+        //bool crouch = action < 0.20;
+
+        bool jump = action > 0.80;
+        
+        //string text = action.ToString();
+        //SetText(text, jump ? Color.cyan : Color.white);
+
+        if (jump)
+        {
+            Jump();
+        }
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.tag != "Obstacle")
+        {
+            return;
+        }
+        isRunning = false;
+
+        score = gm.obstaclesOvercome;
+        //SetText("Score " + score, Color.red);
+        this.gameObject.SetActive(false);
+
     }
 }
