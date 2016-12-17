@@ -122,8 +122,9 @@ public class Character : MonoBehaviour {
         return neuronInput;
     }
 
-    public void HandleNeuronOutput(float action)
+    public void HandleNeuronOutput(double[] actions)
     {
+        float action = Mathf.Abs((float)actions[0]);
         //bool crouch = action < 0.20;
 
         bool jump = action > 0.80;

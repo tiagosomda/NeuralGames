@@ -1126,6 +1126,7 @@ MonoBehaviour:
   onMaxScoreColor: {r: 1, g: 0.561, b: 0, a: 1}
   onMaxScoreFontSize: 50
   scoreRegularSize: 20
+  playMaxScoreSound: 0
   onMaxScoreSound: {fileID: 8300000, guid: 669e213969d133844a70460de96c63ba, type: 3}
   DataItemPrefab: {fileID: 1146260816771980, guid: 2193ca3894edc04449135c0452715425,
     type: 2}
@@ -1406,7 +1407,7 @@ MonoBehaviour:
   createGenomesFromExisting: 0
   simulationCount: 10
   crossOverProbability: 0.6
-  mutationProbability: 0.1
+  mutationProbability: 0.4
   characterSpacing: 0
   skipperPrefab: {fileID: 1000011728720596, guid: d710fd1a2242c7e458fcf1a0625e3f89,
     type: 2}
@@ -1415,6 +1416,9 @@ MonoBehaviour:
   DataItemParent: {fileID: 0}
   isLearning: 0
   noneRunning: 0
+  input: 3
+  output: 1
+  hidden: 0400000004000000
   gameHud: {fileID: 0}
 --- !u!1001 &1271473262
 Prefab:
@@ -1690,7 +1694,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: MAX SCORE 50
+  m_Text: MAX SCORE ---
 --- !u!222 &1524124324
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1764,7 +1768,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Iteration 10
+  m_Text: Iteration ---
 --- !u!222 &1638468902
 CanvasRenderer:
   m_ObjectHideFlags: 0

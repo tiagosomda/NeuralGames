@@ -2,118 +2,232 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-
-public delegate double GAFunction(params double[] values);
-
-/// <summary>
-/// Genetic Algorithm class
-/// </summary>
 public class GeneticAlgorithm
 {
-    /// <summary>
-    /// Default constructor sets mutation rate to 5%, crossover to 80%, population to 100,
-    /// and generations to 2000.
-    /// </summary>
-    public GeneticAlgorithm()
+
+    private List<Genome> m_thisGeneration;
+    private List<Genome> m_nextGeneration;
+
+    private double mutationProb;
+    private double crossoverProb;
+    private bool elitism;
+    private List<double> fitnessTable = new List<double>();
+
+    static System.Random random = new System.Random();
+
+    private GeneticAlgorithm()
     {
-        InitialValues();
-        m_mutationRate = 0.05;
-        m_crossoverRate = 0.80;
-        m_populationSize = 100;
-        m_generationSize = 2000;
-        m_strFitness = "";
+        //default values
+
+        mutationProb = 0.02;
+        crossoverProb = 0.5;
+        elitism = false;
     }
 
-    public GeneticAlgorithm(double crossoverRate,
-              double mutationRate,
-              int populationSize,
-              int generationSize,
-              int genomeSize)
+    private GeneticAlgorithm(double mutationProbability, double crossoverProbability)
     {
-        InitialValues();
-        m_mutationRate = mutationRate;
-        m_crossoverRate = crossoverRate;
-        m_populationSize = populationSize;
-        m_generationSize = generationSize;
-        m_genomeSize = genomeSize;
-        m_strFitness = "";
+        mutationProb = mutationProbability;
+        crossoverProb = crossoverProbability;
+        elitism = true;
     }
 
-    public GeneticAlgorithm(int genomeSize)
+    public static GeneticAlgorithm CreateAlgorithm(double mutationProbability, double crossoverProbability)
     {
-        InitialValues();
-        m_genomeSize = genomeSize;
+        return new GeneticAlgorithm(mutationProbability, crossoverProbability);
     }
 
-
-    public void InitialValues()
+    /*
+    public Genome[] CreateNextGenerationOLD(Genome[] genomePopulation)
     {
-        m_elitism = false;
-    }
+        population = new List<Genome>(genomePopulation);
 
+        List<Genome> nextPopulation = new List<Genome>();
 
-    /// <summary>
-    /// Method which starts the GA executing.
-    /// </summary>
-    public void Go()
-    {
-        /// -------------
-        /// Preconditions
-        /// -------------
-        if (getFitness == null)
-            throw new ArgumentNullException("Need to supply fitness function");
-        if (m_genomeSize == 0)
-            throw new IndexOutOfRangeException("Genome size not set");
-        /// -------------
-
-        //  Create the fitness table.
-        m_fitnessTable = new List<double>();
-        m_thisGeneration = new List<Genome>(m_generationSize);
-        m_nextGeneration = new List<Genome>(m_generationSize);
-        Genome.MutationRate = m_mutationRate;
-
-
-        CreateGenomes();
         RankPopulation();
 
+        Genome topGenome = population[0];
 
-        for (int i = 0; i < m_generationSize; i++)
+        //
+        // TODO: error check - population must be >= 2
+        //
+
+        Genome parent1 = population[0];
+        Genome parent2 = population[1];
+        Genome child1, child2;
+
+        Crossover(parent1, parent2, out child1, out child2);
+
+        child1 = Mutate(child1);
+        child2 = Mutate(child2);
+
+        int startAt = 2;
+        if(elitism)
         {
-            CreateNextGeneration();
-            double fitness = RankPopulation();
-
-            if (i % 100 == 0)
-            {
-                Console.WriteLine("Generation " + i + ", Best Fitness: " + fitness);
-            }
+            startAt++;
+            nextPopulation.Add(topGenome);
         }
 
+        nextPopulation.Add(child2);
+        nextPopulation.Add(child1);
+
+        
+        for(int i = startAt; i < population.Count; i++)
+        {
+            Genome gen1, gen2;
+            Crossover(topGenome, population[i], out gen1, out gen2);
+            gen1 = Mutate(gen1);
+            nextPopulation.Add(gen1);
+        }
+
+        for (int i = 2; i < population.Length; i++)
+        {
+            int pidx1 = RouletteSelection();
+            int pidx2 = RouletteSelection();
+
+            while (pidx1 == pidx2)
+            {
+                pidx2 = RouletteSelection();
+            }
+
+            Genome p1, p2, c1, c2;
+            p1 = population[pidx1];
+            p2 = population[pidx2];
+
+            if (random.NextDouble() < crossoverProb)
+            {
+                Crossover(p1, p2, out c1, out c2);
+            }
+            else
+            {
+                c1 = p1;
+                c2 = p2;
+            }
+
+            c1 = Mutate(c1);
+            c2 = Mutate(c2);
+
+            nextPopulation.Add(child1);
+            nextPopulation.Add(child2);
+        }
+
+        if (elistism)
+        {
+            nextPopulation[0] = topGenome;
+        }
+
+        var retVal = new List<Genome>();
+
+        for (int i = 0; i < population.Count; i++)
+        {
+            retVal.Add(nextPopulation[i]);
+        }
+
+        return retVal.ToArray();
+    }
+    */
+
+    public Genome[] CreateNextGeneration(Brain[] genomePopulation, double mutationProb, double crossoverProb)
+    {
+        double tempMutatio = mutationProb;
+        double tempCrossover = crossoverProb;
+
+        this.mutationProb = mutationProb;
+        this.crossoverProb = crossoverProb;
+
+        var next = CreateNextGeneration(genomePopulation);
+
+        mutationProb = tempMutatio;
+        crossoverProb = tempCrossover;
+
+        return next;
     }
 
-    /// <summary>
-    /// After ranking all the genomes by fitness, use a 'roulette wheel' selection
-    /// method.  This allocates a large probability of selection to those with the 
-    /// highest fitness.
-    /// </summary>
-    /// <returns>Random individual biased towards highest fitness</returns>
+    public Genome[] CreateNextGeneration(Brain[] generation)
+    {
+        m_thisGeneration = new List<Genome>();
+
+        foreach (var item in generation)
+        {
+            m_thisGeneration.Add(item.genome);
+        }
+
+        var m_crossoverRate = crossoverProb;
+        var m_populationSize = m_thisGeneration.Count;
+        m_nextGeneration = new List<Genome>();
+
+        RankPopulation();
+
+        Genome g = null;
+        if (elitism)
+            g = m_thisGeneration[m_populationSize - 1].DeepCopy();
+
+        for (int i = 0; i < m_populationSize; i += 2)
+        {
+            int pidx1 = RouletteSelection();
+            int pidx2 = RouletteSelection();
+            Genome parent1, parent2, child1, child2;
+            parent1 = m_thisGeneration[pidx1];
+            parent2 = m_thisGeneration[pidx2];
+
+            if (random.NextDouble() < m_crossoverRate)
+            {
+                Crossover(parent1, parent2, out child1, out child2);
+                //parent1.Crossover(ref parent2, out child1, out child2);
+            }
+            else
+            {
+                child1 = parent1;
+                child2 = parent2;
+            }
+            child1 = Mutate(child1); //child1.Mutate();
+            child2 = Mutate(child2); //child2.Mutate();
+
+            m_nextGeneration.Add(child1);
+            m_nextGeneration.Add(child2);
+        }
+        if (elitism && g != null)
+            m_nextGeneration[0] = g;
+
+        m_thisGeneration.Clear();
+        foreach (Genome ge in m_nextGeneration)
+            m_thisGeneration.Add(ge);
+
+        return m_nextGeneration.ToArray();
+    }
+
+    private void RankPopulation()
+    {
+        m_thisGeneration.Sort(delegate (Genome x, Genome y)
+        { return Comparer<double>.Default.Compare(x.Fitness, y.Fitness); });
+
+        //m_thisGeneration.Reverse();
+
+        //  create fitness table
+        fitnessTable.Clear();
+        m_thisGeneration.ForEach(genome => fitnessTable.Add(genome.Fitness));
+    }
+
     private int RouletteSelection()
     {
-        double randomFitness = m_random.NextDouble() * m_totalFitness;
+        double totalFitness = 0;
+        m_thisGeneration.ForEach(g => totalFitness += g.Fitness);
+
+        double randomFitness = random.NextDouble() * totalFitness;
         int idx = -1;
         int mid;
         int first = 0;
-        int last = m_populationSize - 1;
+        int last = m_thisGeneration.Count - 1;
         mid = (last - first) / 2;
 
         //  ArrayList's BinarySearch is for exact values only
         //  so do this by hand.
         while (idx == -1 && first <= last)
         {
-            if (randomFitness < m_fitnessTable[mid])
+            if (randomFitness < fitnessTable[mid])
             {
                 last = mid;
             }
-            else if (randomFitness > m_fitnessTable[mid])
+            else if (randomFitness > fitnessTable[mid])
             {
                 first = mid;
             }
@@ -125,301 +239,46 @@ public class GeneticAlgorithm
         return idx;
     }
 
-    /// <summary>
-    /// Rank population and sort in order of fitness.
-    /// </summary>
-    private double RankPopulation()
+    private Genome Mutate(Genome genome)
     {
-        m_totalFitness = 0.0;
-        foreach (Genome g in m_thisGeneration)
+        var g = genome;
+        for (int pos = 0; pos < genome.m_genes.Length; pos++)
         {
-            g.Fitness = FitnessFunction(g.Genes());
-            m_totalFitness += g.Fitness;
+            if (random.NextDouble() < mutationProb)
+                g.m_genes[pos] = (g.m_genes[pos] + (random.NextDouble() + random.Next(-20, 20))) / 2.0;
         }
-        m_thisGeneration.Sort(delegate (Genome x, Genome y)
-        { return Comparer<double>.Default.Compare(x.Fitness, y.Fitness); });
-
-        //  now sorted in order of fitness.
-        double fitness = 0.0;
-        m_fitnessTable.Clear();
-        foreach (Genome t in m_thisGeneration)
-        {
-            fitness += t.Fitness;
-            m_fitnessTable.Add(t.Fitness);
-        }
-
-        return m_fitnessTable[m_fitnessTable.Count - 1];
+        return g;
     }
 
-    /// <summary>
-    /// Create the *initial* genomes by repeated calling the supplied fitness function
-    /// </summary>
-    public void CreateGenomes()
+    private void Crossover(Genome parent1, Genome parent2, out Genome child1, out Genome child2)
     {
-        for (int i = 0; i < m_populationSize; i++)
+        if (random.NextDouble() > crossoverProb)
         {
-            Genome g = new Genome(m_genomeSize);
-            m_thisGeneration.Add(g);
+            // no crossover
+            child1 = parent1;
+            child2 = parent2;
+            return;
         }
-    }
 
-    public void CreateNextGeneration()
-    {
-        m_nextGeneration.Clear();
-        Genome g = null;
-        if (m_elitism)
-            g = m_thisGeneration[m_populationSize - 1].DeepCopy();
+        var m_length = parent1.m_genes.Length;
 
-        for (int i = 0; i < m_populationSize; i += 2)
+        int pos = (int)(random.NextDouble() * (double)m_length);
+        child1 = new Genome(m_length, false);
+        child2 = new Genome(m_length, false);
+
+        for (int i = 0; i < m_length; i++)
         {
-            int pidx1 = RouletteSelection();
-            int pidx2 = RouletteSelection();
-
-            while (pidx1 == pidx2)
+            if (i < pos)
             {
-                pidx2 = RouletteSelection();
-            }
-
-            Genome parent1, parent2, child1, child2;
-            parent1 = m_thisGeneration[pidx1];
-            parent2 = m_thisGeneration[pidx2];
-
-            if (m_random.NextDouble() < m_crossoverRate)
-            {
-                parent1.Crossover(ref parent2, out child1, out child2);
+                child1.m_genes[i] = parent1.m_genes[i];
+                child2.m_genes[i] = parent2.m_genes[i];
             }
             else
             {
-                child1 = parent1;
-                child2 = parent2;
+                child1.m_genes[i] = parent2.m_genes[i];
+                child2.m_genes[i] = parent1.m_genes[i];
             }
-            child1.Mutate();
-            child2.Mutate();
-
-            m_nextGeneration.Add(child1);
-            m_nextGeneration.Add(child2);
         }
-        if (m_elitism && g != null)
-            m_nextGeneration[0] = g;
-
-        m_thisGeneration.Clear();
-        foreach (Genome ge in m_nextGeneration)
-            m_thisGeneration.Add(ge);
-    }
-
-
-    private double m_mutationRate;
-    private double m_crossoverRate;
-    private int m_populationSize;
-    private int m_generationSize;
-    private int m_genomeSize;
-    private double m_totalFitness;
-    private string m_strFitness;
-    private bool m_elitism;
-
-    private List<Genome> m_thisGeneration;
-    private List<Genome> m_nextGeneration;
-    private List<double> m_fitnessTable;
-
-    static System.Random m_random = new System.Random();
-
-
-
-    static private GAFunction getFitness;
-    public GAFunction FitnessFunction
-    {
-        get
-        {
-            return getFitness;
-        }
-        set
-        {
-            getFitness = value;
-        }
-    }
-
-
-    //  Properties
-    public int PopulationSize
-    {
-        get
-        {
-            return m_populationSize;
-        }
-        set
-        {
-            m_populationSize = value;
-        }
-    }
-
-    public int Generations
-    {
-        get
-        {
-            return m_generationSize;
-        }
-        set
-        {
-            m_generationSize = value;
-        }
-    }
-
-    public int GenomeSize
-    {
-        get
-        {
-            return m_genomeSize;
-        }
-        set
-        {
-            m_genomeSize = value;
-        }
-    }
-
-    public double CrossoverRate
-    {
-        get
-        {
-            return m_crossoverRate;
-        }
-        set
-        {
-            m_crossoverRate = value;
-        }
-    }
-    public double MutationRate
-    {
-        get
-        {
-            return m_mutationRate;
-        }
-        set
-        {
-            m_mutationRate = value;
-        }
-    }
-
-    public string FitnessFile
-    {
-        get
-        {
-            return m_strFitness;
-        }
-        set
-        {
-            m_strFitness = value;
-        }
-    }
-
-    /// <summary>
-    /// Keep previous generation's fittest individual in place of worst in current
-    /// </summary>
-    public bool Elitism
-    {
-        get
-        {
-            return m_elitism;
-        }
-        set
-        {
-            m_elitism = value;
-        }
-    }
-
-    public void GetBest(out double[] values, out double fitness)
-    {
-        Genome g = m_thisGeneration[m_populationSize - 1];
-        values = new double[g.Length];
-        g.GetValues(ref values);
-        fitness = g.Fitness;
-    }
-
-    public void GetWorst(out double[] values, out double fitness)
-    {
-        GetNthGenome(0, out values, out fitness);
-    }
-
-    public void GetNthGenome(int n, out double[] values, out double fitness)
-    {
-        /// Preconditions
-        /// -------------
-        if (n < 0 || n > m_populationSize - 1)
-            throw new ArgumentOutOfRangeException("n too large, or too small");
-        /// -------------
-        Genome g = m_thisGeneration[n];
-        values = new double[g.Length];
-        g.GetValues(ref values);
-        fitness = g.Fitness;
-    }
-
-
-
-    public void CreateFitnessTable()
-    {
-        //  Create the fitness table.
-        m_fitnessTable = new List<double>();
-        m_thisGeneration = new List<Genome>(m_generationSize);
-        m_nextGeneration = new List<Genome>(m_generationSize);
-        Genome.MutationRate = m_mutationRate;
-    }
-
-
-    public int GetMaxIterations()
-    {
-        return m_generationSize;
-    }
-
-    public int GetGenomeFamilySize()
-    {
-        return m_thisGeneration.Count;
-    }
-
-    public Genome GetGenomeAtIndex(int index)
-    {
-        var arr = m_thisGeneration.ToArray();
-
-        if (index > arr.Length)
-        {
-            Debug.LogError("INDEX IS GREATER THAN ARRAY");
-            return null;
-        }
-        return arr[index];
-    }
-
-    public void SetGenomeAtIndex(int index, Genome genome)
-    {
-        m_thisGeneration[index] = genome;
-    }
-
-    public void SetTotalFitness(double fitness)
-    {
-        m_totalFitness = fitness;
-    }
-    public void AddTotalFitness(double fitness)
-    {
-        m_totalFitness += fitness;
-    }
-
-    public double GetTotalFitness()
-    {
-        return m_totalFitness;
-    }
-
-    public double SortInFitnessOrder()
-    {
-        m_thisGeneration.Sort(delegate (Genome x, Genome y)
-        { return Comparer<double>.Default.Compare(x.Fitness, y.Fitness); });
-
-        //  now sorted in order of fitness.
-        double fitness = 0.0;
-        m_fitnessTable.Clear();
-        foreach (Genome t in m_thisGeneration)
-        {
-            fitness += t.Fitness;
-            m_fitnessTable.Add(t.Fitness);
-        }
-
-        return m_fitnessTable[m_fitnessTable.Count - 1];
     }
 }
 
