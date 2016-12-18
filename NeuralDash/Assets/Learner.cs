@@ -58,6 +58,8 @@ public class Learner : MonoBehaviour
 
     public void Start()
     {
+        ga = GeneticAlgorithm.CreateAlgorithm(mutationProbability, crossOverProbability);
+
         isLearning = false;
 
         skipperArray = new Character[simulationCount];
@@ -75,14 +77,14 @@ public class Learner : MonoBehaviour
             skipperArray[i] = skipperGameObject.GetComponent<Character>();
         }
 
-        ga = GeneticAlgorithm.CreateAlgorithm(mutationProbability, crossOverProbability);
+        
     }
 
     public void FixedUpdate()
     {
         if (Input.GetKeyDown(KeyCode.P))
         {
-            StartLearning();
+            NewGeneration();
             gm.ResetGame();
             isLearning = true;
         }
@@ -126,66 +128,22 @@ public class Learner : MonoBehaviour
         }
     }
 
-    public void StartLearning()
-    {
-        Debug.Log("Starting learning process...");
-        //ga.Go();
-        //ga.CreateFitnessTable();
-
-        if (createGenomesFromExisting)
-        {
-            CreateGenomeWithExperience();
-        }
-
-        currentIteration = 0;
-        NewGeneration();
-
-        foreach (var skipper in skipperArray)
-        {
-            skipper.ResetSkipper();
-        }
-    }
-
-    public void CreateGenomeWithExperience()
-    {
-        //look for best existing genome
-        string SaveFolder = @"E:\Dev\Projects\NeuralGames\NeuralDash\Assets\_game\savedGenomes\";
-
-        var files = Directory.GetFiles(SaveFolder);
-        int max = 0;
-        var bestGenome = "";
-
-        foreach (var f in files)
-        {
-
-            var filename = f.Remove(0, SaveFolder.Length);
-            var parts = filename.Split('.');
-            var score = int.Parse(parts[1]);
-
-            if (score > max)
-            {
-                max = score;
-                bestGenome = f;
-            }
-        }
-
-        var genomeStr = File.ReadAllText(bestGenome);
-
-        var genome = DeserializeGenome(genomeStr);
-
-        skipperArray[0].brain.Genes = genome.Genes();
-        for (int i = 1; i < simulationCount; i++)
-        {
-            var newGenome = genome.DeepCopy();
-
-            newGenome.Mutate();
-            skipperArray[i].brain.Genes = newGenome.Genes();
-        }
-    }
-
     public void NewGeneration()
     {
-        if (currentIteration > 0)
+        if(currentIteration == 0)
+        {
+            if (createGenomesFromExisting)
+            {
+                CreateGenomeWithExperience();
+            }
+
+            currentIteration = 0;
+            foreach (var skipper in skipperArray)
+            {
+                skipper.ResetSkipper();
+            }
+        }
+        else if (currentIteration > 0)
         {
             if (thisGenBrains == null)
             {
@@ -198,19 +156,12 @@ public class Learner : MonoBehaviour
                 thisGenBrains.Add(skipperArray[i].brain);
             }
 
-
             var nextBrainGen = geneticAlgorithm.CreateNextGeneration(thisGenBrains);
 
             for (int i = 0; i < nextBrainGen.Count; i++)
             {
                 skipperArray[i].brain.SetNetworkWeights(nextBrainGen[i].Genes());
             }
-
-            //var totalFfitness = ga.SortInFitnessOrder();
-            //ga.AddTotalFitness(totalFfitness);
-            //ga.CreateNextGeneration();
-            //ga.SetTotalFitness(0);
-            //var maxIterations = ga.GetMaxIterations();
 
             if (currentIteration >= maxIterations)
             {
@@ -266,58 +217,41 @@ public class Learner : MonoBehaviour
         }
     }
 
-    public BackpropagationNetwork CreateNetwork(int input, int output, int[] hidden)
+    #region Helper Methods
+    public void CreateGenomeWithExperience()
     {
-        LinearLayer inputLayer = new LinearLayer(input);
-        SigmoidLayer outputLayer = new SigmoidLayer(output);
+        //look for best existing genome
+        string SaveFolder = @"E:\Dev\Projects\NeuralGames\NeuralDash\Assets\_game\savedGenomes\";
 
-        // minimum size
-        if (hidden == null)
+        var files = Directory.GetFiles(SaveFolder);
+        int max = 0;
+        var bestGenome = "";
+
+        foreach (var f in files)
         {
-            hidden = new int[] { input + 1, input + 1 };
-        }
 
-        var hiddenLayers = new SigmoidLayer[hidden.Length];
+            var filename = f.Remove(0, SaveFolder.Length);
+            var parts = filename.Split('.');
+            var score = int.Parse(parts[1]);
 
-        // plus two because of the input and the output layers
-        var connectors = new BackpropagationConnector[hidden.Length + 2];
-
-        // create the hidden layers
-        for (int k = 0; k < hidden.Length; k++)
-        {
-            hiddenLayers[k] = new SigmoidLayer(hidden[k]);
-        }
-
-        // back propagation from first hidden layer to input
-        connectors[0] = new BackpropagationConnector(inputLayer, hiddenLayers[0]);
-
-        // back propagation between the hidden layers
-        for (int k = 1; k < hidden.Length; k++)
-        {
-            connectors[k] = new BackpropagationConnector(hiddenLayers[k - 1], hiddenLayers[k]);
-        }
-        // back propagation from output to last hidden layer
-        connectors[hidden.Length - 1] = new BackpropagationConnector(hiddenLayers[hidden.Length - 1], outputLayer);
-
-        // The network
-        var network = new BackpropagationNetwork(inputLayer, outputLayer);
-
-        return network;
-    }
-
-    public void setNetworkWeights(BackpropagationNetwork aNetwork, double[] weights)
-    {
-        // Setup the network's weights.
-        int index = 0;
-
-        foreach (BackpropagationConnector connector in aNetwork.Connectors)
-        {
-            foreach (BackpropagationSynapse synapse in connector.Synapses)
+            if (score > max)
             {
-                synapse.Weight = weights[index++];
-                //synapse.SourceNeuron.SetBias(weights[index++]);
-                synapse.SourceNeuron.Bias = weights[index++];
+                max = score;
+                bestGenome = f;
             }
+        }
+
+        var genomeStr = File.ReadAllText(bestGenome);
+
+        var genome = DeserializeGenome(genomeStr);
+
+        skipperArray[0].brain.Genes = genome.Genes();
+        for (int i = 1; i < simulationCount; i++)
+        {
+            var newGenome = genome.DeepCopy();
+
+            newGenome.Mutate();
+            skipperArray[i].brain.Genes = newGenome.Genes();
         }
     }
 
@@ -374,4 +308,5 @@ public class Learner : MonoBehaviour
             Debug.LogWarningFormat("Unable to delete : [{0}] Error: [{1}]", file, ex.Message);
         };
     }
+    #endregion
 }
