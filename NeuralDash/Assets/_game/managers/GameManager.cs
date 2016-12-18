@@ -10,6 +10,10 @@ public class GameManager : MonoBehaviour {
     public int score = 0;
     public int maxScore;
 
+    public GameObject skipperPrefab;
+    public int simulationCount;
+    public float characterSpacing;
+
     public Learner learner;
     private HUD gameHud;
 
@@ -39,6 +43,8 @@ public class GameManager : MonoBehaviour {
 
 
         gameHud = GameObject.FindGameObjectWithTag("HUD").GetComponent<HUD>();
+
+        CreateEntities();
     }
 	
 	// Update is called once per frame
@@ -51,7 +57,12 @@ public class GameManager : MonoBehaviour {
             obstacleManager.SetSpawnRateInMilliseconds(spawnRate);
         }
 
-	    if(Input.GetKeyUp(KeyCode.Return))
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            learner.Begin();
+        }
+
+        if (Input.GetKeyUp(KeyCode.Return))
         {
             ResetGame();
         }
@@ -64,6 +75,26 @@ public class GameManager : MonoBehaviour {
         }
 
         gameHud.SetIteration(learner.currentIteration);
+    }
+
+    public void CreateEntities()
+    {
+        Character[] skipperArray = new Character[simulationCount];
+
+        for (int i = 0; i < simulationCount; i++)
+        {
+            var skipperGameObject = Instantiate(skipperPrefab);
+            skipperGameObject.transform.SetParent(gameObject.transform);
+
+            var pos = skipperGameObject.transform.position;
+            pos.x -= characterSpacing * i;
+            skipperGameObject.transform.position = pos;
+
+            skipperGameObject.name = "[" + i + "]";
+            skipperArray[i] = skipperGameObject.GetComponent<Character>();
+        }
+
+        learner.AddStudents(skipperArray);
     }
 
     public void ObstaclePassed()

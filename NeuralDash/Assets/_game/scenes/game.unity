@@ -1349,6 +1349,10 @@ MonoBehaviour:
   levelRange: 5
   score: 0
   maxScore: 0
+  skipperPrefab: {fileID: 1000011728720596, guid: d710fd1a2242c7e458fcf1a0625e3f89,
+    type: 2}
+  simulationCount: 10
+  characterSpacing: 0
   learner: {fileID: 1176848640}
   obstacleManager: {fileID: 1499669957}
 --- !u!4 &1092930077
@@ -1411,13 +1415,7 @@ MonoBehaviour:
   nextIteration: 0
   maxIterations: 200000
   gm: {fileID: 0}
-  simulationCount: 10
-  characterSpacing: 0
-  skipperPrefab: {fileID: 1000011728720596, guid: d710fd1a2242c7e458fcf1a0625e3f89,
-    type: 2}
   skipperArray: []
-  DataItemPrefab: {fileID: 0}
-  DataItemParent: {fileID: 0}
   isLearning: 0
   noneRunning: 0
   input: 3
