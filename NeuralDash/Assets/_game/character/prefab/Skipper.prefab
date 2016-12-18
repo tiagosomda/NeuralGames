@@ -312,6 +312,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95f68016201b0584a9da395a490792d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  InputLayer: 3
+  HiddenLayers: 0400000004000000
+  OutputLayer: 1
+  isRunning: 0
   sensor: {fileID: 114000011166068632}
   jumpForce: 8
   isGrounded: 1
@@ -319,7 +323,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   groundRadiusCheck: 0.05
-  isRunning: 0
 --- !u!212 &212228714138178042
 SpriteRenderer:
   m_ObjectHideFlags: 1

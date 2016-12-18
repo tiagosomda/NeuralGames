@@ -126,7 +126,7 @@ public class GeneticAlgorithm
     }
     */
 
-    public Genome[] CreateNextGeneration(Brain[] genomePopulation, double mutationProb, double crossoverProb)
+    public List<Genome> CreateNextGeneration(List<Brain> genomePopulation, double mutationProb, double crossoverProb)
     {
         double tempMutatio = mutationProb;
         double tempCrossover = crossoverProb;
@@ -142,14 +142,11 @@ public class GeneticAlgorithm
         return next;
     }
 
-    public Genome[] CreateNextGeneration(Brain[] generation)
+    public List<Genome> CreateNextGeneration(List<Brain> generation)
     {
         m_thisGeneration = new List<Genome>();
 
-        foreach (var item in generation)
-        {
-            m_thisGeneration.Add(item.genome);
-        }
+        generation.ForEach(gen => m_thisGeneration.Add(gen.genome));
 
         var m_crossoverRate = crossoverProb;
         var m_populationSize = m_thisGeneration.Count;
@@ -192,7 +189,7 @@ public class GeneticAlgorithm
         foreach (Genome ge in m_nextGeneration)
             m_thisGeneration.Add(ge);
 
-        return m_nextGeneration.ToArray();
+        return m_nextGeneration;
     }
 
     private void RankPopulation()

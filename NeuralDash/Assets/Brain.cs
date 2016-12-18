@@ -5,7 +5,7 @@ using NeuronDotNet.Core.Backpropagation;
 using NeuronDotNet.Core;
 using System;
 
-public partial class Brain : MonoBehaviour {
+public partial class Brain {
     public BackpropagationNetwork neuralNetwork;
     public Genome genome;
 
@@ -123,8 +123,13 @@ public partial class Brain : MonoBehaviour {
         return netWeightCount;
     }
 
-    public double[] ProcessSensorInput(double[] input)
+    public double[] ProcessSensorData(double[] input)
     {
+        if(input == null)
+        {
+            return null;
+        }
+
         return neuralNetwork.Run(input);
     }
 

@@ -8,11 +8,22 @@ using System.IO;
 
 public class Learner : MonoBehaviour
 {
-    public GameManager gm;
     public bool createGenomesFromExisting;
-    public int simulationCount;
+
     public float crossOverProbability;
     public float mutationProbability;
+    public int currentIteration = 0;
+    public int nextIteration = 0;
+    public int maxIterations = 200000;
+
+    private List<AICharacter> characters;
+    private List<Brain> thisGenBrains;
+    private GeneticAlgorithm geneticAlgorithm;
+    private double prevMaxFitness = -1;
+    private bool stopRunning;
+
+    public GameManager gm;
+    public int simulationCount;
     public float characterSpacing;
 
     public GameObject skipperPrefab;
@@ -27,12 +38,8 @@ public class Learner : MonoBehaviour
     public static List<string> data_names;
     public static List<Text> data_values;
 
-    private Brain[] skipperBrain;
-    private BackpropagationNetwork network;
 
     private GeneticAlgorithm ga;
-
-    private double prevMaxFitness = -1;
 
     public bool isLearning = false;
     public bool noneRunning = false;
@@ -45,11 +52,13 @@ public class Learner : MonoBehaviour
 
     public HUD gameHud;
 
-    int currentIteration = 0;
     public Genome genome;
 
-    int nextIteration = 0;
-    int maxIterations = 200000;
+    public void Awake()
+    {
+        geneticAlgorithm = GeneticAlgorithm.CreateAlgorithm(mutationProbability, crossOverProbability);
+        gm = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
+    }
 
     public void Start()
     {
@@ -61,7 +70,6 @@ public class Learner : MonoBehaviour
         //var output = 1; // jump,crouch,normal (as double value)
         //var hidden = new int[] { 4, 5 }; // 2 hidden layers with for inputs each
 
-        skipperBrain = new Brain[simulationCount];
         skipperArray = new Character[simulationCount];
 
         for (int i = 0; i < simulationCount; i++)
@@ -133,10 +141,10 @@ public class Learner : MonoBehaviour
 
             // run on neural network
             //float output = Mathf.Abs((float)skipperBrain[i].ProcessSensorInput(input)[0]);
-            var output = skipperBrain[i].ProcessSensorInput(input);
+            var output = skipperArray[i].brain.ProcessSensorData(input);
 
             //send input action back to player
-            skipperArray[i].HandleNeuronOutput(output);
+            skipperArray[i].ProcessBrainOutput(output);
         }
     }
 
@@ -169,7 +177,7 @@ public class Learner : MonoBehaviour
         {
             for (int i = 0; i < simulationCount; i++)
             {
-                skipperBrain[i] = Brain.CreateAIEntity(input, output, hidden, true);
+                skipperArray[i].brain = Brain.CreateAIEntity(input, output, hidden, true);
             }
         }
     }
@@ -201,13 +209,13 @@ public class Learner : MonoBehaviour
 
         var genome = DeserializeGenome(genomeStr);
 
-        skipperBrain[0].Genes = genome.Genes();
+        skipperArray[0].brain.Genes = genome.Genes();
         for (int i = 1; i < simulationCount; i++)
         {
             var newGenome = genome.DeepCopy();
 
             newGenome.Mutate();
-            skipperBrain[i].Genes = newGenome.Genes();
+            skipperArray[i].brain.Genes = newGenome.Genes();
         }
     }
 
@@ -219,12 +227,23 @@ public class Learner : MonoBehaviour
 
         if (currentIteration > 0)
         {
-
-            var nextBrainGen = ga.CreateNextGeneration(skipperBrain);
-
-            for(int i = 0; i < nextBrainGen.Length; i++)
+            if (thisGenBrains == null)
             {
-                skipperBrain[i].SetNetworkWeights(nextBrainGen[i].Genes());
+                thisGenBrains = new List<Brain>();
+            }
+            thisGenBrains.Clear();
+
+            for (int i = 0; i < skipperArray.Length; i++)
+            {
+                thisGenBrains.Add(skipperArray[i].brain);
+            }
+
+
+            var nextBrainGen = geneticAlgorithm.CreateNextGeneration(thisGenBrains);
+
+            for (int i = 0; i < nextBrainGen.Count; i++)
+            {
+                skipperArray[i].brain.SetNetworkWeights(nextBrainGen[i].Genes());
             }
 
             //var totalFfitness = ga.SortInFitnessOrder();
@@ -263,7 +282,7 @@ public class Learner : MonoBehaviour
         {
             var skipperScore = (double)(skipperArray[i].GetScore() + 1);
             var gameScore = (double)(gm.score + 1);
-            skipperBrain[i].Fitness = skipperScore / gameScore;
+            skipperArray[i].brain.Fitness = skipperScore / gameScore;
 
             if (skipperScore > maxScore)
             {
@@ -274,7 +293,7 @@ public class Learner : MonoBehaviour
 
         if (maxScore > prevMaxFitness)
         {
-            SaveGenome(string.Format("iter{0}.gen{1}", currentIteration, name), maxScore, skipperBrain[name].genome);
+            SaveGenome(maxScore, skipperArray[name].brain.genome);
             SetBestScore(currentIteration, name, maxScore.ToString());
             prevMaxFitness = maxScore;
         }
@@ -363,7 +382,7 @@ public class Learner : MonoBehaviour
         gameHud.PanelRight(name, value, color);
     }
 
-    public static void SaveGenome(string name, int score, Genome genome)
+    public static void SaveGenome(int score, Genome genome)
     {
         string SaveFolder = @"E:\Dev\Projects\NeuralGames\NeuralDash\Assets\_game\savedGenomes\";
 
@@ -375,7 +394,7 @@ public class Learner : MonoBehaviour
 
         files.ForEach(file => TryDelete(file));
 
-        File.WriteAllText(string.Format(filePath, name), SerializeGenome(genome));
+        File.WriteAllText(filePath, SerializeGenome(genome));
     }
 
     public static string SerializeGenome(Genome genome)

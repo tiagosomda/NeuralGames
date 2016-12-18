@@ -1403,11 +1403,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 925bd6b8106d5fb4dad1be7476b8f6a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gm: {fileID: 1092930076}
   createGenomesFromExisting: 0
-  simulationCount: 10
   crossOverProbability: 0.6
   mutationProbability: 0.4
+  currentIteration: 0
+  nextIteration: 0
+  maxIterations: 200000
+  gm: {fileID: 0}
+  simulationCount: 10
   characterSpacing: 0
   skipperPrefab: {fileID: 1000011728720596, guid: d710fd1a2242c7e458fcf1a0625e3f89,
     type: 2}

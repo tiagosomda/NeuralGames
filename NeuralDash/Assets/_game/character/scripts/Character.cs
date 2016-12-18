@@ -1,22 +1,19 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Character : MonoBehaviour {
+public class Character : AICharacter {
 
     public Sensor sensor;
 
     public float jumpForce = 10f;
     public bool isGrounded = true;
     public LayerMask whatIsGround;
-
     public float groundRadiusCheck = 0.05f;
 
     private Animator animator;
     private Rigidbody2D rb;
 
     private Transform groundCheck;
-
-    public bool isRunning;
 
     private int score;
 
@@ -31,9 +28,12 @@ public class Character : MonoBehaviour {
 
     public void Awake()
     {
+        InitializeAI();
+
         groundCheck = transform.Find("GroundCheck");
         animator = GetComponentInChildren<Animator>();
-        rb = GetComponent<Rigidbody2D>();
+        rb = gameObject.GetComponent<Rigidbody2D>();
+
 
         gm = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
         gameHud = GameObject.FindGameObjectWithTag("HUD").GetComponent<HUD>();
@@ -58,7 +58,6 @@ public class Character : MonoBehaviour {
     {
         if (isGrounded)
         {
-            //rb.AddForce(Vector2.up * jumpForce);
             rb.velocity = Vector2.up * jumpForce;
             isGrounded = false;
         }
@@ -90,25 +89,26 @@ public class Character : MonoBehaviour {
         gameObject.transform.position = initialPosition;
     }
 
-    public void ResetSkipper()
+    public override void ResetSkipper()
     {
-        this.gameObject.SetActive(true);
+        gameObject.SetActive(true);
 
-        var rb = gameObject.GetComponent<Rigidbody2D>();
         rb.velocity = Vector2.zero;
 
         SetInitialPosition();
 
         SetCharData("---", Color.black);
+
         isRunning = true;
+        isOperative = true;
     }
 
-    public int GetScore()
+    public override int GetScore()
     {
         return score;
     }
 
-    public double[] GetSensorReading()
+    public override double[] GetSensorReading()
     {
         if (sensor.Data == null)
         {
@@ -122,8 +122,13 @@ public class Character : MonoBehaviour {
         return neuronInput;
     }
 
-    public void HandleNeuronOutput(double[] actions)
+    public override void ProcessBrainOutput(double[] actions)
     {
+        if(actions == null)
+        {
+            return;
+        }
+
         float action = Mathf.Abs((float)actions[0]);
         //bool crouch = action < 0.20;
 
@@ -138,7 +143,6 @@ public class Character : MonoBehaviour {
             Jump();
         }
     }
-
 
     public void SetCharData(string text, Color color)
     {
@@ -160,6 +164,7 @@ public class Character : MonoBehaviour {
         SetCharData("Score " + score, Color.black);
 
         isRunning = false;
+        isOperative = false;
         this.gameObject.SetActive(false);
 
     }
