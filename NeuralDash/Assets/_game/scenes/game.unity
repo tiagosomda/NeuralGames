@@ -1349,6 +1349,7 @@ MonoBehaviour:
   levelRange: 5
   score: 0
   maxScore: 0
+  learner: {fileID: 1176848640}
   obstacleManager: {fileID: 1499669957}
 --- !u!4 &1092930077
 Transform:
@@ -1422,7 +1423,6 @@ MonoBehaviour:
   input: 3
   output: 1
   hidden: 0400000004000000
-  gameHud: {fileID: 0}
 --- !u!1001 &1271473262
 Prefab:
   m_ObjectHideFlags: 0

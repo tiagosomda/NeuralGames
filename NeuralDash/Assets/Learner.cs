@@ -48,10 +48,6 @@ public class Learner : MonoBehaviour
     public int output = 1;
     public int[] hidden = new int[2]{ 4, 4 };
 
-    private bool isSimulationRunning;
-
-    public HUD gameHud;
-
     public Genome genome;
 
     public void Awake()
@@ -62,13 +58,7 @@ public class Learner : MonoBehaviour
 
     public void Start()
     {
-        gameHud = GameObject.FindGameObjectWithTag("HUD").GetComponent<HUD>();
-
         isLearning = false;
-
-        //var input = 3;  // speed, distance, size
-        //var output = 1; // jump,crouch,normal (as double value)
-        //var hidden = new int[] { 4, 5 }; // 2 hidden layers with for inputs each
 
         skipperArray = new Character[simulationCount];
 
@@ -85,11 +75,6 @@ public class Learner : MonoBehaviour
             skipperArray[i] = skipperGameObject.GetComponent<Character>();
         }
 
-        //ga = new GeneticAlgorithm(crossOverProbability, mutationProbability, simulationCount, 2000 * 50, 64);
-        //ga.Elitism = true;
-        //ga.FitnessFunction = new GAFunction(PlayGame);
-        //ga.Go();
-
         ga = GeneticAlgorithm.CreateAlgorithm(mutationProbability, crossOverProbability);
     }
 
@@ -97,11 +82,6 @@ public class Learner : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.P))
         {
-
-            gameHud.ResetTopValues();
-
-            SetCurrentGen(0);
-            SetBestScore(0, 0, "---");
             StartLearning();
             gm.ResetGame();
             isLearning = true;
@@ -139,8 +119,6 @@ public class Learner : MonoBehaviour
                 continue;
             }
 
-            // run on neural network
-            //float output = Mathf.Abs((float)skipperBrain[i].ProcessSensorInput(input)[0]);
             var output = skipperArray[i].brain.ProcessSensorData(input);
 
             //send input action back to player
@@ -152,9 +130,12 @@ public class Learner : MonoBehaviour
     {
         Debug.Log("Starting learning process...");
         //ga.Go();
-       //ga.CreateFitnessTable();
+        //ga.CreateFitnessTable();
 
-        CreateGenomes();
+        if (createGenomesFromExisting)
+        {
+            CreateGenomeWithExperience();
+        }
 
         currentIteration = 0;
         NewGeneration();
@@ -162,23 +143,6 @@ public class Learner : MonoBehaviour
         foreach (var skipper in skipperArray)
         {
             skipper.ResetSkipper();
-        }
-    }
-
-    public void CreateGenomes()
-    {
-        //ga.CreateGenomes();
-
-        if (createGenomesFromExisting)
-        {
-            CreateGenomeWithExperience();
-        }
-        else
-        {
-            for (int i = 0; i < simulationCount; i++)
-            {
-                skipperArray[i].brain = Brain.CreateAIEntity(input, output, hidden, true);
-            }
         }
     }
 
@@ -221,10 +185,6 @@ public class Learner : MonoBehaviour
 
     public void NewGeneration()
     {
-        SetCurrentGen(currentIteration);
-
-        gameHud.SetScore(0, false);
-
         if (currentIteration > 0)
         {
             if (thisGenBrains == null)
@@ -294,7 +254,6 @@ public class Learner : MonoBehaviour
         if (maxScore > prevMaxFitness)
         {
             SaveGenome(maxScore, skipperArray[name].brain.genome);
-            SetBestScore(currentIteration, name, maxScore.ToString());
             prevMaxFitness = maxScore;
         }
 
@@ -305,16 +264,6 @@ public class Learner : MonoBehaviour
         {
             skipper.ResetSkipper();
         }
-    }
-
-    public void SetBestScore(int gen, int name, string score)
-    {
-        gameHud.PanelRight("BEST SCORE : ", score, Color.black);
-    }
-
-    public void SetCurrentGen(int iteration)
-    {
-        gameHud.SetIteration(iteration);
     }
 
     public BackpropagationNetwork CreateNetwork(int input, int output, int[] hidden)
@@ -370,16 +319,6 @@ public class Learner : MonoBehaviour
                 synapse.SourceNeuron.Bias = weights[index++];
             }
         }
-    }
-
-    public void SetDataItem(string name, string value)
-    {
-        SetDataItem(name, value, Color.black);
-    }
-
-    public void SetDataItem(string name, string value, Color color)
-    {
-        gameHud.PanelRight(name, value, color);
     }
 
     public static void SaveGenome(int score, Genome genome)

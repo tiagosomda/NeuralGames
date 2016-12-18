@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour {
     public int score = 0;
     public int maxScore;
 
+    public Learner learner;
     private HUD gameHud;
 
     //public GameObject GameTitle;
@@ -61,6 +62,8 @@ public class GameManager : MonoBehaviour {
             var velocity = obstacleManager.GetObstacleVelocity() + velocityIncreatePerLevel;
             obstacleManager.SetObstacleSpeed(velocity);
         }
+
+        gameHud.SetIteration(learner.currentIteration);
     }
 
     public void ObstaclePassed()
