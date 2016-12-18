@@ -22,13 +22,12 @@ public class Learner : MonoBehaviour
 
     public GameManager gm;
 
-
     public AICharacter[] skipperArray;
 
     private GeneticAlgorithm ga;
 
-    public bool isLearning = false;
-    public bool noneRunning = false;
+    //public bool isLearning = false;
+    //public bool noneRunning = false;
 
     public int input = 3;
     public int output = 1;
@@ -42,42 +41,13 @@ public class Learner : MonoBehaviour
         gm = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
     }
 
-    public void Start()
-    {
-        isLearning = false;        
-    }
-
     public void AddStudents(AICharacter[] students)
     {
         skipperArray = students;
     }
 
-    public void FixedUpdate()
+    public void ActivateBrain()
     {
-        if (!isLearning)
-        {
-            return;
-        }
-
-        foreach (var skipper in skipperArray)
-        {
-            if (skipper.isRunning)
-            {
-                noneRunning = false;
-                break;
-            }
-
-            noneRunning = true;
-        }
-
-        if (noneRunning)
-        {
-            isLearning = false;
-            EndGeneration();
-            NewGeneration();
-            return;
-        }
-
         for (int i = 0; i < skipperArray.Length; i++)
         {
             var input = skipperArray[i].GetSensorReading();
@@ -97,7 +67,6 @@ public class Learner : MonoBehaviour
     {
         NewGeneration();
         gm.ResetGame();
-        isLearning = true;
     }
 
     public void NewGeneration()
@@ -141,8 +110,6 @@ public class Learner : MonoBehaviour
             }
         }
 
-        isLearning = true;
-        noneRunning = false;
         gm.ResetGame();
         gm.SetSpawning(true);
     }
@@ -181,7 +148,6 @@ public class Learner : MonoBehaviour
         }
 
         currentIteration++;
-
 
         foreach (var skipper in skipperArray)
         {

@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour {
 
     public Learner learner;
     private HUD gameHud;
+    private Character[] students;
 
     //public GameObject GameTitle;
     //public GameObject RunningScreen;
@@ -30,6 +31,14 @@ public class GameManager : MonoBehaviour {
     //private bool gameOver = true;
 
     private int levelCountdown;
+
+    private bool isLearning;
+    private bool noneRunning;
+
+    void Awake()
+    {
+        isLearning = false;
+    }
 
     // Use this for initialization
     void Start () {
@@ -60,6 +69,7 @@ public class GameManager : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.P))
         {
             learner.Begin();
+            isLearning = true;
         }
 
         if (Input.GetKeyUp(KeyCode.Return))
@@ -77,9 +87,40 @@ public class GameManager : MonoBehaviour {
         gameHud.SetIteration(learner.currentIteration);
     }
 
+    public void FixedUpdate()
+    {
+        if (!isLearning)
+        {
+            return;
+        }
+
+        foreach (var skipper in students)
+        {
+            if (skipper.isRunning)
+            {
+                noneRunning = false;
+                break;
+            }
+
+            noneRunning = true;
+        }
+
+        if (noneRunning)
+        {
+            isLearning = false;
+            learner.EndGeneration();
+            learner.NewGeneration();
+            noneRunning = false;
+            isLearning = true;
+            return;
+        }
+
+        learner.ActivateBrain();
+    }
+
     public void CreateEntities()
     {
-        Character[] skipperArray = new Character[simulationCount];
+        students = new Character[simulationCount];
 
         for (int i = 0; i < simulationCount; i++)
         {
@@ -91,10 +132,10 @@ public class GameManager : MonoBehaviour {
             skipperGameObject.transform.position = pos;
 
             skipperGameObject.name = "[" + i + "]";
-            skipperArray[i] = skipperGameObject.GetComponent<Character>();
+            students[i] = skipperGameObject.GetComponent<Character>();
         }
 
-        learner.AddStudents(skipperArray);
+        learner.AddStudents(students);
     }
 
     public void ObstaclePassed()
