@@ -13,18 +13,16 @@ public class Learner : MonoBehaviour
     public float crossOverProbability;
     public float mutationProbability;
     public int currentIteration = 0;
-    public int nextIteration = 0;
-    public int maxIterations = 200000;
+
+    private int nextIteration = 0;
+    private int maxIterations = 200000;
+
+    private GeneticAlgorithm geneticAlgorithm;
 
     private List<Brain> thisGenBrains;
-    private GeneticAlgorithm geneticAlgorithm;
     private double prevMaxFitness = -1;
 
-    //public GameManager gm;
-
-    public AICharacter[] skipperArray;
-
-    private GeneticAlgorithm ga;
+    public AICharacter[] AIList;
 
     public void Awake()
     {
@@ -33,29 +31,24 @@ public class Learner : MonoBehaviour
 
     public void AddStudents(AICharacter[] students)
     {
-        skipperArray = students;
+        AIList = students;
     }
 
     public void ActivateBrain()
     {
-        for (int i = 0; i < skipperArray.Length; i++)
+        for (int i = 0; i < AIList.Length; i++)
         {
-            var input = skipperArray[i].GetSensorReading();
-            if (input == null || !skipperArray[i].isRunning)
+            var input = AIList[i].GetSensorReading();
+            if (input == null || !AIList[i].isRunning)
             {
                 continue;
             }
 
-            var output = skipperArray[i].brain.ProcessSensorData(input);
+            var output = AIList[i].brain.ProcessSensorData(input);
 
             //send input action back to player
-            skipperArray[i].ProcessBrainOutput(output);
+            AIList[i].ProcessBrainOutput(output);
         }
-    }
-
-    public void Begin()
-    {
-        NewGeneration();
     }
 
     public void NewGeneration()
@@ -68,7 +61,7 @@ public class Learner : MonoBehaviour
             }
 
             currentIteration = 0;
-            foreach (var skipper in skipperArray)
+            foreach (var skipper in AIList)
             {
                 skipper.ResetSkipper();
             }
@@ -81,16 +74,16 @@ public class Learner : MonoBehaviour
             }
             thisGenBrains.Clear();
 
-            for (int i = 0; i < skipperArray.Length; i++)
+            for (int i = 0; i < AIList.Length; i++)
             {
-                thisGenBrains.Add(skipperArray[i].brain);
+                thisGenBrains.Add(AIList[i].brain);
             }
 
             var nextBrainGen = geneticAlgorithm.CreateNextGeneration(thisGenBrains);
 
             for (int i = 0; i < nextBrainGen.Count; i++)
             {
-                skipperArray[i].brain.SetNetworkWeights(nextBrainGen[i].Genes());
+                AIList[i].brain.SetNetworkWeights(nextBrainGen[i].Genes());
             }
 
             if (currentIteration >= maxIterations)
@@ -113,9 +106,9 @@ public class Learner : MonoBehaviour
         int name = 0;
         var maxScore = 0;
 
-        for (int i = 0; i < skipperArray.Length; i++)
+        for (int i = 0; i < AIList.Length; i++)
         {
-            var skipperScore = (double)(skipperArray[i].GetScore() + 1);
+            var skipperScore = (double)(AIList[i].GetScore() + 1);
             if (skipperScore > maxScore)
             {
                 name = i;
@@ -123,23 +116,23 @@ public class Learner : MonoBehaviour
             }
         }
 
-        for (int i = 0; i < skipperArray.Length; i++)
+        for (int i = 0; i < AIList.Length; i++)
         {
-            var skipperScore = (double)(skipperArray[i].GetScore() + 1);
+            var skipperScore = (double)(AIList[i].GetScore() + 1);
             
-            skipperArray[i].brain.Fitness = skipperScore / maxScore;
+            AIList[i].brain.Fitness = skipperScore / maxScore;
 
         }
 
         if (maxScore > prevMaxFitness)
         {
-            SaveGenome(maxScore, skipperArray[name].brain.genome);
+            SaveGenome(maxScore, AIList[name].brain.genome);
             prevMaxFitness = maxScore;
         }
 
         currentIteration++;
 
-        foreach (var skipper in skipperArray)
+        foreach (var skipper in AIList)
         {
             skipper.ResetSkipper();
         }
@@ -173,13 +166,13 @@ public class Learner : MonoBehaviour
 
         var genome = DeserializeGenome(genomeStr);
 
-        skipperArray[0].brain.Genes = genome.Genes();
-        for (int i = 1; i < skipperArray.Length; i++)
+        AIList[0].brain.Genes = genome.Genes();
+        for (int i = 1; i < AIList.Length; i++)
         {
             var newGenome = genome.DeepCopy();
 
             newGenome.Mutate();
-            skipperArray[i].brain.Genes = newGenome.Genes();
+            AIList[i].brain.Genes = newGenome.Genes();
         }
     }
 
