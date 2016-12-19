@@ -10,10 +10,13 @@ public class Learner : MonoBehaviour
 {
     public float crossOverProbability;
     public float mutationProbability;
-    private double prevMaxFitness = -1;
+
+    public int maxIterations = 20000;
+    public int iteration;
 
     private GeneticAlgorithm geneticAlgorithm;
     private List<Brain> brainArr;
+    private double prevMaxFitness = -1;
 
     public void Awake()
     {

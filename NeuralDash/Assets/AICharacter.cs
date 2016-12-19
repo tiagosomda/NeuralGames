@@ -35,6 +35,11 @@ public abstract class AICharacter : MonoBehaviour {
 
     public void ActivateBrain()
     {
+        if(!isRunning)
+        {
+            return;
+        }
+
         var input = GetSensorReading();
         var output = brain.ProcessSensorData(input);
         //send input action back to player

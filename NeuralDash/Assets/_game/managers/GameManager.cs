@@ -10,9 +10,6 @@ public class GameManager : MonoBehaviour {
     public int score = 0;
     public int maxScore;
 
-    public int maxIterations = 20000;
-    private int iteration;
-
     public GameObject skipperPrefab;
     public int simulationCount;
     public float characterSpacing;
@@ -26,6 +23,7 @@ public class GameManager : MonoBehaviour {
     private int levelCountdown;
 
     private bool isLearning;
+    private GeneticAlgorithm geneticAlgorithm;
 
     void Awake()
     {
@@ -44,93 +42,7 @@ public class GameManager : MonoBehaviour {
 
         gameHud = GameObject.FindGameObjectWithTag("HUD").GetComponent<HUD>();
 
-        CreateEntities();
-    }
-	
-	// Update is called once per frame
-	void Update () {
-
-        if(Input.GetKeyUp(KeyCode.S))
-        {
-            obstacleManager.IsSpawning(!obstacleManager.IsSpawning());
-            obstacleManager.SetObstacleSpeed(initialVelocity);
-            obstacleManager.SetSpawnRateInMilliseconds(spawnRate);
-        }
-
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            //learner.NewGeneration(true);
-            ResetGame();
-            StartGame();
-            iteration = 0;
-        }
-
-        if (Input.GetKeyUp(KeyCode.Return))
-        {
-            ResetGame();
-        }
-
-        if (levelCountdown <= 0)
-        {
-            levelCountdown = levelRange;
-            var velocity = obstacleManager.GetObstacleVelocity() + velocityIncreatePerLevel;
-            obstacleManager.SetObstacleSpeed(velocity);
-        }
-
-        gameHud.SetIteration(iteration);
-    }
-
-    public void FixedUpdate()
-    {
-        if (!isLearning)
-        {
-            return;
-        }
-
-        // we we reach the max of iterations
-        // stop running the simulation
-        if (iteration >= maxIterations)
-        {
-            GameOver();
-            return;
-        }
-
-        // Activate the brain for
-        // all the agents running
-        foreach (var agent in agents)
-        {
-            if (agent.isRunning)
-            {
-                agent.ActivateBrain();
-            }
-        }
-
-        // as long as there is an agent running
-        // we end the game loop here
-        foreach (var agent in agents)
-        {
-            if (agent.isRunning)
-            {
-                return;
-            }
-        }
-
-        // no one is running
-        // start new generation
-        if (isLearning)
-        {
-            iteration++;
-            GameOver();
-
-            learner.NextGen(agents);
-
-            ResetGame();
-            StartGame();
-        }
-    }
-
-    public void CreateEntities()
-    {
+        #region Creating AI Entities
         agents = new Character[simulationCount];
 
         for (int i = 0; i < simulationCount; i++)
@@ -145,6 +57,95 @@ public class GameManager : MonoBehaviour {
             skipperGameObject.name = "[" + i + "]";
             agents[i] = skipperGameObject.GetComponent<Character>();
         }
+        #endregion
+    }
+	
+	// Update is called once per frame
+	void Update () {
+
+        if(Input.GetKeyUp(KeyCode.S))
+        {
+            obstacleManager.IsSpawning(!obstacleManager.IsSpawning());
+            obstacleManager.SetObstacleSpeed(initialVelocity);
+            obstacleManager.SetSpawnRateInMilliseconds(spawnRate);
+        }
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            ResetGame();
+            StartGame();
+            learner.iteration = 0;
+        }
+
+        if (Input.GetKeyUp(KeyCode.Return))
+        {
+            ResetGame();
+        }
+
+        if (levelCountdown <= 0)
+        {
+            levelCountdown = levelRange;
+            var velocity = obstacleManager.GetObstacleVelocity() + velocityIncreatePerLevel;
+            obstacleManager.SetObstacleSpeed(velocity);
+        }
+
+        gameHud.SetIteration(learner.iteration);
+    }
+
+    public void FixedUpdate()
+    {
+        if (!isLearning)
+        {
+            return;
+        }
+
+        // we we reach the max of iterations
+        // stop running the simulation
+        if (learner.iteration >= learner.maxIterations)
+        {
+            GameOver();
+            return;
+        }
+
+        // Activate the brain for
+        // all the agents running
+        foreach (var agent in agents)
+        {
+            agent.ActivateBrain();
+        }
+
+        // as long as there is an agent running
+        // we end the game loop here
+        if(AnyAgentRunning())
+        {
+            return;
+        }
+
+        // no one is running
+        // start new generation
+        if (isLearning)
+        {
+            learner.iteration++;
+            GameOver();
+
+            learner.NextGen(agents);
+
+            ResetGame();
+            StartGame();
+        }
+    }
+
+    public bool AnyAgentRunning()
+    {
+        foreach (var agent in agents)
+        {
+            if (agent.isRunning)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void ObstaclePassed()
