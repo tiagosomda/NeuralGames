@@ -10,22 +10,21 @@ public class GameManager : MonoBehaviour {
     public int score = 0;
     public int maxScore;
 
-    public int maxIterations = 10;
+    public int maxIterations = 20000;
 
     public GameObject skipperPrefab;
     public int simulationCount;
     public float characterSpacing;
 
     public Learner learner;
-    private HUD gameHud;
-    private Character[] students;
-
     public ObstacleManager obstacleManager;
+
+    private HUD gameHud;
+    private Character[] agents;
 
     private int levelCountdown;
 
     private bool isLearning;
-    private bool noneRunning;
 
     void Awake()
     {
@@ -61,9 +60,7 @@ public class GameManager : MonoBehaviour {
         {
             learner.NewGeneration();
             ResetGame();
-            SetSpawning(true);
-            ResetGame();
-            isLearning = true;
+            StartGame();
         }
 
         if (Input.GetKeyUp(KeyCode.Return))
@@ -88,46 +85,50 @@ public class GameManager : MonoBehaviour {
             return;
         }
 
+        // we we reach the max of iterations
+        // stop running the simulation
         if (learner.currentIteration >= maxIterations)
         {
-            isLearning = false;
-            SetSpawning(false);
             GameOver();
             return;
         }
 
-        foreach (var skipper in students)
+        // Activate the brain for
+        // all the agents running
+        foreach (var agent in agents)
         {
-            if (skipper.isRunning)
+            if (agent.isRunning)
             {
-                noneRunning = false;
-                break;
+                agent.ActivateBrain();
             }
-
-            noneRunning = true;
         }
 
-        if (noneRunning)
+        // as long as there is an agent running
+        // we end the game loop here
+        foreach (var agent in agents)
         {
-            isLearning = false;
-            learner.EndGeneration();
-            SetSpawning(false);
+            if (agent.isRunning)
+            {
+                return;
+            }
+        }
+
+        // no one is running
+        // start new generation
+        if (isLearning)
+        {
             GameOver();
+            learner.EndGeneration();
 
             learner.NewGeneration();
             ResetGame();
-            SetSpawning(true);
-            noneRunning = false;
-            isLearning = true;
-            return;
+            StartGame();
         }
-
-        learner.ActivateBrain();
     }
 
     public void CreateEntities()
     {
-        students = new Character[simulationCount];
+        agents = new Character[simulationCount];
 
         for (int i = 0; i < simulationCount; i++)
         {
@@ -139,16 +140,15 @@ public class GameManager : MonoBehaviour {
             skipperGameObject.transform.position = pos;
 
             skipperGameObject.name = "[" + i + "]";
-            students[i] = skipperGameObject.GetComponent<Character>();
+            agents[i] = skipperGameObject.GetComponent<Character>();
         }
 
-        learner.SetAICharacters(students);
+        learner.SetAICharacters(agents);
     }
 
     public void ObstaclePassed()
     {
-        score += 1;
-        SetScore();
+        SetScore(score++);
         levelCountdown--;
         if(obstacleManager.GetSpawnRate() > 500)
         {
@@ -162,10 +162,8 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    public void SetScore()
+    public void SetScore(int score)
     {
-        //score = score * 100;
-
         gameHud.SetScore(score, score > maxScore);
 
         if(score > maxScore)
@@ -179,35 +177,25 @@ public class GameManager : MonoBehaviour {
         gameHud.SetIteration(iteration);
     }
 
-    public void ResetGame()
+    public void StartGame()
     {
-        //gameOver = false;
-
-        obstacleManager.SetSpawnRateInMilliseconds(spawnRate);
-        
-        //RunningScreen.SetActive(true);
-        //GameTitle.SetActive(false);
-        //GameOverScreen.SetActive(false);
-        //SetScore();
-
-        score = 0;
-        obstacleManager.SetObstacleSpeed(initialVelocity);
-    }
-
-
-    public void SetSpawning(bool isSpawning)
-    {
-        obstacleManager.IsSpawning(isSpawning);
+        isLearning = true;
+        obstacleManager.IsSpawning(true);
     }
 
     public void GameOver()
     {
+        isLearning = false;
+        obstacleManager.IsSpawning(false);
         obstacleManager.ResetObstacles();
+    }
 
-        //RunningScreen.SetActive(false);
-        //GameTitle.SetActive(true);
-        //GameOverScreen.SetActive(true);
+    public void ResetGame()
+    {
+        obstacleManager.SetSpawnRateInMilliseconds(spawnRate);
+        obstacleManager.SetObstacleSpeed(initialVelocity);
 
-        //gameOver = true;
+        score = 0;
+        SetScore(score);
     }
 }

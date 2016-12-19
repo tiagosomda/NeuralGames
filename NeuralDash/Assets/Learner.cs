@@ -34,23 +34,6 @@ public class Learner : MonoBehaviour
         AIList = arr;
     }
 
-    public void ActivateBrain()
-    {
-        for (int i = 0; i < AIList.Length; i++)
-        {
-            var input = AIList[i].GetSensorReading();
-            if (input == null || !AIList[i].isRunning)
-            {
-                continue;
-            }
-
-            var output = AIList[i].brain.ProcessSensorData(input);
-
-            //send input action back to player
-            AIList[i].ProcessBrainOutput(output);
-        }
-    }
-
     public void NewGeneration()
     {
         if(currentIteration == 0)
