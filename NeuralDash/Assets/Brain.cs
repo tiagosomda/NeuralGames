@@ -34,17 +34,15 @@ public partial class Brain {
         }
     }
 
-    public int networkWeightCount;
-
     public static Brain CreateAIEntity(int input, int output, int[] hidden, bool createGenes)
     {
         var brain = new Brain();
 
-        brain.networkWeightCount = brain.CreateNeuralNetwork(input, output, hidden);
+        var networkWeightCount = brain.CreateNeuralNetwork(input, output, hidden);
 
         brain.neuralNetwork.Initialize();
 
-        brain.genome = new Genome(brain.networkWeightCount, createGenes);
+        brain.genome = new Genome(networkWeightCount, createGenes);
 
         brain.SetNetworkWeights(brain.Genes);
 
@@ -65,11 +63,6 @@ public partial class Brain {
                 synapse.SourceNeuron.Bias = weights[index++];
             }
         }
-    }
-
-    public void SetFitness(double fitness)
-    {
-        genome.Fitness = fitness;
     }
 
     private int CreateNeuralNetwork(int input, int output, int[] hidden)
@@ -131,10 +124,5 @@ public partial class Brain {
         }
 
         return neuralNetwork.Run(input);
-    }
-
-    public void ProcessNeuralNetworkOutput(double[] output)
-    {
-        // do nothing
     }
 }
