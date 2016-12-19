@@ -1408,19 +1408,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 925bd6b8106d5fb4dad1be7476b8f6a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  createGenomesFromExisting: 0
   crossOverProbability: 0.6
   mutationProbability: 0.4
-  currentIteration: 0
-  nextIteration: 0
-  maxIterations: 200000
-  gm: {fileID: 0}
-  skipperArray: []
-  isLearning: 0
-  noneRunning: 0
-  input: 3
-  output: 1
-  hidden: 0400000004000000
+  maxIterations: 20000
+  iteration: 0
 --- !u!1001 &1271473262
 Prefab:
   m_ObjectHideFlags: 0
