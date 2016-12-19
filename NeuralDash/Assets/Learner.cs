@@ -8,20 +8,12 @@ using System.IO;
 
 public class Learner : MonoBehaviour
 {
-    public bool createGenomesFromExisting;
-
     public float crossOverProbability;
     public float mutationProbability;
-    public int currentIteration = 0;
-
-    private int nextIteration = 0;
-
-    private GeneticAlgorithm geneticAlgorithm;
-
-    private List<Brain> brainArr;
     private double prevMaxFitness = -1;
 
-    public AICharacter[] AIList;
+    private GeneticAlgorithm geneticAlgorithm;
+    private List<Brain> brainArr;
 
     public void Awake()
     {
@@ -29,91 +21,67 @@ public class Learner : MonoBehaviour
         brainArr = new List<Brain>();
     }
 
-    public void SetAICharacters(AICharacter[] arr)
+    public AICharacter[] NextGen(AICharacter[] population)
     {
-        AIList = arr;
-    }
-
-    public void NewGeneration()
-    {
-        if(currentIteration == 0)
-        {
-            if (createGenomesFromExisting)
-            {
-                CreateGenomeWithExperience();
-            }
-
-            currentIteration = 0;
-            foreach (var skipper in AIList)
-            {
-                skipper.ResetSkipper();
-            }
-        }
-        else if (currentIteration > 0)
-        {
-            brainArr.Clear();
-            for (int i = 0; i < AIList.Length; i++)
-            {
-                brainArr.Add(AIList[i].brain);
-            }
-
-            var nextGenBrainArr = geneticAlgorithm.CreateNextGeneration(brainArr);
-
-            for (int i = 0; i < nextGenBrainArr.Count; i++)
-            {
-                AIList[i].SetGenes(nextGenBrainArr[i].Genes());
-            }
-        }
-    }
-
-    public void EndGeneration()
-    {
-        if (nextIteration > currentIteration)
-        {
-            Debug.Log("THIS HAPPENED!!!!");
-            return;
-        }
-
-        nextIteration++;
-
+        #region END GEN
         int name = 0;
-        var maxScore = 0;
+        var maxFitness = 0;
 
-        for (int i = 0; i < AIList.Length; i++)
+        // GET MAX SCORE
+        for (int i = 0; i < population.Length; i++)
         {
-            var skipperScore = (double)(AIList[i].GetScore() + 1);
-            if (skipperScore > maxScore)
+            var fitness = (double)(population[i].GetScore() + 1);
+            if (fitness > maxFitness)
             {
                 name = i;
-                maxScore = (int)skipperScore;
+                maxFitness = (int)fitness;
             }
         }
 
-        for (int i = 0; i < AIList.Length; i++)
+        // CALCULATE FITNESS
+        for (int i = 0; i < population.Length; i++)
         {
-            var skipperScore = (double)(AIList[i].GetScore() + 1);
-            
-            AIList[i].brain.Fitness = skipperScore / maxScore;
+            var skipperScore = (double)(population[i].GetScore() + 1);
+
+            population[i].brain.Fitness = skipperScore / maxFitness;
 
         }
 
-        if (maxScore > prevMaxFitness)
+        // SAVE BEST GENOME
+        if (maxFitness > prevMaxFitness)
         {
-            SaveGenome(maxScore, AIList[name].brain.genome);
-            prevMaxFitness = maxScore;
+            SaveGenome(maxFitness, population[name].brain.genome);
+            prevMaxFitness = maxFitness;
+        }
+        #endregion
+
+        // NEW GEN
+        #region NEW GEN
+        brainArr.Clear();
+
+        // RETRIEVE BRAINS!
+        for (int i = 0; i < population.Length; i++)
+        {
+            brainArr.Add(population[i].brain);
         }
 
-        currentIteration++;
+        // GENERATE NEXT GEN GENES!
+        var nextGenBrainArr = geneticAlgorithm.CreateNextGeneration(brainArr);
 
-        foreach (var skipper in AIList)
+        // SET CURRENT GENES
+        for (int i = 0; i < nextGenBrainArr.Count; i++)
         {
-            skipper.ResetSkipper();
+            population[i].SetGenes(nextGenBrainArr[i].Genes());
         }
+        #endregion
+
+        return population;
     }
 
     #region Helper Methods
-    public void CreateGenomeWithExperience()
+    public T[] CreateGenomeWithExperience<T>(int size) where T : AICharacter
     {
+        var AIList = new T[size];
         //look for best existing genome
         string SaveFolder = @"E:\Dev\Projects\NeuralGames\NeuralDash\Assets\_game\savedGenomes\";
 
@@ -147,6 +115,8 @@ public class Learner : MonoBehaviour
             newGenome.Mutate();
             AIList[i].brain.Genes = newGenome.Genes();
         }
+
+        return AIList;
     }
 
     public static void SaveGenome(int score, Genome genome)

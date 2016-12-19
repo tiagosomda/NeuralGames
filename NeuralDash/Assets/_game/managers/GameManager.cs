@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour {
     public int maxScore;
 
     public int maxIterations = 20000;
+    private int iteration;
 
     public GameObject skipperPrefab;
     public int simulationCount;
@@ -58,9 +59,10 @@ public class GameManager : MonoBehaviour {
 
         if (Input.GetKeyDown(KeyCode.P))
         {
-            learner.NewGeneration();
+            //learner.NewGeneration(true);
             ResetGame();
             StartGame();
+            iteration = 0;
         }
 
         if (Input.GetKeyUp(KeyCode.Return))
@@ -75,7 +77,7 @@ public class GameManager : MonoBehaviour {
             obstacleManager.SetObstacleSpeed(velocity);
         }
 
-        gameHud.SetIteration(learner.currentIteration);
+        gameHud.SetIteration(iteration);
     }
 
     public void FixedUpdate()
@@ -87,7 +89,7 @@ public class GameManager : MonoBehaviour {
 
         // we we reach the max of iterations
         // stop running the simulation
-        if (learner.currentIteration >= maxIterations)
+        if (iteration >= maxIterations)
         {
             GameOver();
             return;
@@ -117,10 +119,11 @@ public class GameManager : MonoBehaviour {
         // start new generation
         if (isLearning)
         {
+            iteration++;
             GameOver();
-            learner.EndGeneration();
 
-            learner.NewGeneration();
+            learner.NextGen(agents);
+
             ResetGame();
             StartGame();
         }
@@ -142,8 +145,6 @@ public class GameManager : MonoBehaviour {
             skipperGameObject.name = "[" + i + "]";
             agents[i] = skipperGameObject.GetComponent<Character>();
         }
-
-        learner.SetAICharacters(agents);
     }
 
     public void ObstaclePassed()
@@ -194,6 +195,11 @@ public class GameManager : MonoBehaviour {
     {
         obstacleManager.SetSpawnRateInMilliseconds(spawnRate);
         obstacleManager.SetObstacleSpeed(initialVelocity);
+
+        foreach (var skipper in agents)
+        {
+            skipper.ResetSkipper();
+        }
 
         score = 0;
         SetScore(score);
