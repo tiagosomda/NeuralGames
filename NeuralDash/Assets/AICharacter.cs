@@ -18,6 +18,11 @@ public abstract class AICharacter : MonoBehaviour {
         brain = Brain.CreateAIEntity(InputLayer, OutputLayer, HiddenLayers, true);
     }
 
+    public void SetGenes(double[] weights)
+    {
+        brain.SetNetworkWeights(weights);
+    }
+
     public abstract double[] GetSensorReading();
 
     public abstract void ProcessBrainOutput(double[] actions);

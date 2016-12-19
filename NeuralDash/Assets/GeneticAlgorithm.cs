@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 public class GeneticAlgorithm
 {
-
     private List<Genome> m_thisGeneration;
     private List<Genome> m_nextGeneration;
 
@@ -35,96 +34,6 @@ public class GeneticAlgorithm
     {
         return new GeneticAlgorithm(mutationProbability, crossoverProbability);
     }
-
-    /*
-    public Genome[] CreateNextGenerationOLD(Genome[] genomePopulation)
-    {
-        population = new List<Genome>(genomePopulation);
-
-        List<Genome> nextPopulation = new List<Genome>();
-
-        RankPopulation();
-
-        Genome topGenome = population[0];
-
-        //
-        // TODO: error check - population must be >= 2
-        //
-
-        Genome parent1 = population[0];
-        Genome parent2 = population[1];
-        Genome child1, child2;
-
-        Crossover(parent1, parent2, out child1, out child2);
-
-        child1 = Mutate(child1);
-        child2 = Mutate(child2);
-
-        int startAt = 2;
-        if(elitism)
-        {
-            startAt++;
-            nextPopulation.Add(topGenome);
-        }
-
-        nextPopulation.Add(child2);
-        nextPopulation.Add(child1);
-
-        
-        for(int i = startAt; i < population.Count; i++)
-        {
-            Genome gen1, gen2;
-            Crossover(topGenome, population[i], out gen1, out gen2);
-            gen1 = Mutate(gen1);
-            nextPopulation.Add(gen1);
-        }
-
-        for (int i = 2; i < population.Length; i++)
-        {
-            int pidx1 = RouletteSelection();
-            int pidx2 = RouletteSelection();
-
-            while (pidx1 == pidx2)
-            {
-                pidx2 = RouletteSelection();
-            }
-
-            Genome p1, p2, c1, c2;
-            p1 = population[pidx1];
-            p2 = population[pidx2];
-
-            if (random.NextDouble() < crossoverProb)
-            {
-                Crossover(p1, p2, out c1, out c2);
-            }
-            else
-            {
-                c1 = p1;
-                c2 = p2;
-            }
-
-            c1 = Mutate(c1);
-            c2 = Mutate(c2);
-
-            nextPopulation.Add(child1);
-            nextPopulation.Add(child2);
-        }
-
-        if (elistism)
-        {
-            nextPopulation[0] = topGenome;
-        }
-
-        var retVal = new List<Genome>();
-
-        for (int i = 0; i < population.Count; i++)
-        {
-            retVal.Add(nextPopulation[i]);
-        }
-
-        return retVal.ToArray();
-    }
-    */
 
     public List<Genome> CreateNextGeneration(List<Brain> genomePopulation, double mutationProb, double crossoverProb)
     {

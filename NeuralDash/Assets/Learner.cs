@@ -15,11 +15,10 @@ public class Learner : MonoBehaviour
     public int currentIteration = 0;
 
     private int nextIteration = 0;
-    private int maxIterations = 200000;
 
     private GeneticAlgorithm geneticAlgorithm;
 
-    private List<Brain> thisGenBrains;
+    private List<Brain> brainArr;
     private double prevMaxFitness = -1;
 
     public AICharacter[] AIList;
@@ -27,11 +26,12 @@ public class Learner : MonoBehaviour
     public void Awake()
     {
         geneticAlgorithm = GeneticAlgorithm.CreateAlgorithm(mutationProbability, crossOverProbability);
+        brainArr = new List<Brain>();
     }
 
-    public void AddStudents(AICharacter[] students)
+    public void SetAICharacters(AICharacter[] arr)
     {
-        AIList = students;
+        AIList = arr;
     }
 
     public void ActivateBrain()
@@ -68,27 +68,17 @@ public class Learner : MonoBehaviour
         }
         else if (currentIteration > 0)
         {
-            if (thisGenBrains == null)
-            {
-                thisGenBrains = new List<Brain>();
-            }
-            thisGenBrains.Clear();
-
+            brainArr.Clear();
             for (int i = 0; i < AIList.Length; i++)
             {
-                thisGenBrains.Add(AIList[i].brain);
+                brainArr.Add(AIList[i].brain);
             }
 
-            var nextBrainGen = geneticAlgorithm.CreateNextGeneration(thisGenBrains);
+            var nextGenBrainArr = geneticAlgorithm.CreateNextGeneration(brainArr);
 
-            for (int i = 0; i < nextBrainGen.Count; i++)
+            for (int i = 0; i < nextGenBrainArr.Count; i++)
             {
-                AIList[i].brain.SetNetworkWeights(nextBrainGen[i].Genes());
-            }
-
-            if (currentIteration >= maxIterations)
-            {
-                return;
+                AIList[i].SetGenes(nextGenBrainArr[i].Genes());
             }
         }
     }

@@ -10,6 +10,8 @@ public class GameManager : MonoBehaviour {
     public int score = 0;
     public int maxScore;
 
+    public int maxIterations = 10;
+
     public GameObject skipperPrefab;
     public int simulationCount;
     public float characterSpacing;
@@ -18,17 +20,7 @@ public class GameManager : MonoBehaviour {
     private HUD gameHud;
     private Character[] students;
 
-    //public GameObject GameTitle;
-    //public GameObject RunningScreen;
-    //public GameObject GameOverScreen;
-
-    //public Text ObstacleCountText;
-
-    //public Text Score;
-
     public ObstacleManager obstacleManager;
-
-    //private bool gameOver = true;
 
     private int levelCountdown;
 
@@ -49,7 +41,6 @@ public class GameManager : MonoBehaviour {
         {
             Debug.LogWarning("Missing ObstacleManager script on GameObject");
         }
-
 
         gameHud = GameObject.FindGameObjectWithTag("HUD").GetComponent<HUD>();
 
@@ -94,6 +85,14 @@ public class GameManager : MonoBehaviour {
     {
         if (!isLearning)
         {
+            return;
+        }
+
+        if (learner.currentIteration >= maxIterations)
+        {
+            isLearning = false;
+            SetSpawning(false);
+            GameOver();
             return;
         }
 
@@ -143,7 +142,7 @@ public class GameManager : MonoBehaviour {
             students[i] = skipperGameObject.GetComponent<Character>();
         }
 
-        learner.AddStudents(students);
+        learner.SetAICharacters(students);
     }
 
     public void ObstaclePassed()

@@ -17,14 +17,13 @@ public class Character : AICharacter {
 
     private int score;
 
-    bool isInitPosSetOnce = false;
-    Vector2 initialPosition;
+    private bool isInitPosSetOnce = false;
+    private Vector2 initialPosition;
 
-    GameManager gm;
-    HUD gameHud;
+    private GameManager gm;
+    private HUD gameHud;
 
     private double[] neuronInput = new double[3];
-
 
     public void Awake()
     {
@@ -34,12 +33,10 @@ public class Character : AICharacter {
         animator = GetComponentInChildren<Animator>();
         rb = gameObject.GetComponent<Rigidbody2D>();
 
-
         gm = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
         gameHud = GameObject.FindGameObjectWithTag("HUD").GetComponent<HUD>();
     }
 
-    // Update is called once per frame
     void Update()
     {
 
