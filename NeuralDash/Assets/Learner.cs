@@ -20,25 +20,15 @@ public class Learner : MonoBehaviour
     private GeneticAlgorithm geneticAlgorithm;
     private double prevMaxFitness = -1;
 
-    public GameManager gm;
+    //public GameManager gm;
 
     public AICharacter[] skipperArray;
 
     private GeneticAlgorithm ga;
 
-    //public bool isLearning = false;
-    //public bool noneRunning = false;
-
-    public int input = 3;
-    public int output = 1;
-    public int[] hidden = new int[2]{ 4, 4 };
-
-    public Genome genome;
-
     public void Awake()
     {
         geneticAlgorithm = GeneticAlgorithm.CreateAlgorithm(mutationProbability, crossOverProbability);
-        gm = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
     }
 
     public void AddStudents(AICharacter[] students)
@@ -66,7 +56,6 @@ public class Learner : MonoBehaviour
     public void Begin()
     {
         NewGeneration();
-        gm.ResetGame();
     }
 
     public void NewGeneration()
@@ -109,36 +98,37 @@ public class Learner : MonoBehaviour
                 return;
             }
         }
-
-        gm.ResetGame();
-        gm.SetSpawning(true);
     }
 
     public void EndGeneration()
     {
         if (nextIteration > currentIteration)
         {
+            Debug.Log("THIS HAPPENED!!!!");
             return;
         }
 
         nextIteration++;
 
-        gm.SetSpawning(false);
-        gm.GameOver();
-
         int name = 0;
         var maxScore = 0;
+
         for (int i = 0; i < skipperArray.Length; i++)
         {
             var skipperScore = (double)(skipperArray[i].GetScore() + 1);
-            var gameScore = (double)(gm.score + 1);
-            skipperArray[i].brain.Fitness = skipperScore / gameScore;
-
             if (skipperScore > maxScore)
             {
                 name = i;
                 maxScore = (int)skipperScore;
             }
+        }
+
+        for (int i = 0; i < skipperArray.Length; i++)
+        {
+            var skipperScore = (double)(skipperArray[i].GetScore() + 1);
+            
+            skipperArray[i].brain.Fitness = skipperScore / maxScore;
+
         }
 
         if (maxScore > prevMaxFitness)

@@ -69,6 +69,9 @@ public class GameManager : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.P))
         {
             learner.Begin();
+            ResetGame();
+            SetSpawning(true);
+            ResetGame();
             isLearning = true;
         }
 
@@ -109,7 +112,12 @@ public class GameManager : MonoBehaviour {
         {
             isLearning = false;
             learner.EndGeneration();
+            SetSpawning(false);
+            GameOver();
+
             learner.NewGeneration();
+            ResetGame();
+            SetSpawning(true);
             noneRunning = false;
             isLearning = true;
             return;
