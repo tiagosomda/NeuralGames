@@ -17,6 +17,7 @@ public class CharacterControl : MonoBehaviour {
 
     private Weapon weapon;
 
+    public int score;
 
     // Use this for initialization
     void Awake () {
@@ -44,5 +45,27 @@ public class CharacterControl : MonoBehaviour {
     public void WeaponAction()
     {
         weapon.Action();
+    }
+
+    public bool CanDoAction()
+    {
+        return weapon.CanDoAction();
+    }
+
+    public void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.tag != gameObject.tag)
+        {
+            var control = collision.gameObject.GetComponent<WeaponCollider>();
+            control.AddPoint(1);
+            Destroy(collision.gameObject);
+        }
+    }
+
+    public void AddPoint(int points)
+    {
+        score += points;
+
+        Debug.Log("POINTS! " + score);
     }
 }

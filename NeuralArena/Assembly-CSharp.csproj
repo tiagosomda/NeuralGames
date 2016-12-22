@@ -46,6 +46,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\AIController.cs" />
      <Compile Include="Assets\AIDriver\AICharacter.cs" />
      <Compile Include="Assets\AIDriver\Brain.cs" />
      <Compile Include="Assets\AIDriver\GeneticAlgorithm.cs" />
@@ -53,6 +54,7 @@
      <Compile Include="Assets\AIDriver\Learner.cs" />
      <Compile Include="Assets\Archer\Archer.cs" />
      <Compile Include="Assets\Archer\Bow.cs" />
+     <Compile Include="Assets\Archer\WeaponCollider.cs" />
      <Compile Include="Assets\ArenaFloor.cs" />
      <Compile Include="Assets\ArrowCollider.cs" />
      <Compile Include="Assets\ArrowWeapon.cs" />
@@ -62,6 +64,9 @@
      <Compile Include="Assets\CharacterMovement.cs" />
      <Compile Include="Assets\GameController.cs" />
      <Compile Include="Assets\Gladiator.cs" />
+     <Compile Include="Assets\Gladiators\Barbarian\Axe.cs" />
+     <Compile Include="Assets\Gladiators\Weapons\Sword.cs" />
+     <Compile Include="Assets\KillZone.cs" />
      <Compile Include="Assets\Vision.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>D:/Programs/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>

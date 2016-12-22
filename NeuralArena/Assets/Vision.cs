@@ -7,7 +7,7 @@ public class Vision : MonoBehaviour {
     public float degrees;
     public float reach;
 
-    public LayerMask[] layer;
+    private LayerMask[] layer;
 
     public float Range
     {
@@ -38,24 +38,28 @@ public class Vision : MonoBehaviour {
     private float offset = 0.7f;
     private RaycastHit2D hit;
 
+    private Transform visionTransform;
+
     public void Awake()
     {
         presense = new Dictionary<LayerMask, bool>();
+        visionTransform = Instantiate(new GameObject()).transform;
+
     }
 
     public bool IsPresent(LayerMask layer)
     {
-        if(presense.ContainsKey(layer))
+        if(!presense.ContainsKey(layer))
         {
-            return presense[layer];
+            presense.Add(layer, false);
         }
 
-        return false;
+        return presense[layer];
     }
 
     public void Update()
     {
-        foreach(var l in layer)
+        foreach(var l in presense.Keys)
         {
             if(Anyone(l))
             {
@@ -67,7 +71,7 @@ public class Vision : MonoBehaviour {
 
     private bool Anyone(LayerMask l)
     {
-        var rot = transform.parent.rotation.eulerAngles;
+        var rot = transform.rotation.eulerAngles;
         rot.z -= degrees / 2;
 
         if(!presense.ContainsKey(l))
@@ -83,8 +87,8 @@ public class Vision : MonoBehaviour {
         for (int i = 0; i < degrees; i++)
         {
             rot.z++;
-            transform.rotation = Quaternion.Euler(rot);
-            hit = Physics2D.Raycast(transform.position + (transform.up * offset), transform.up, reach, l);
+            visionTransform.rotation = Quaternion.Euler(rot);
+            hit = Physics2D.Raycast(visionTransform.position + (visionTransform.up * offset), visionTransform.up, reach, l);
 
             if(hit.collider != null)
             {
@@ -98,16 +102,16 @@ public class Vision : MonoBehaviour {
 
     public void DrawRange()
     {
-        var rot = transform.parent.rotation.eulerAngles;
+        var rot = transform.rotation.eulerAngles;
 
         rot.z -= degrees / 2;
 
-        transform.rotation = Quaternion.Euler(rot);
+        visionTransform.rotation = Quaternion.Euler(rot);
 
-        Debug.DrawLine(transform.position, transform.position + ((reach + offset) * transform.up));
+        Debug.DrawLine(transform.position, transform.position + ((reach + offset) * visionTransform.up));
 
         rot.z += degrees;
-        transform.rotation = Quaternion.Euler(rot);
-        Debug.DrawLine(transform.position, transform.position + ((reach + offset) * transform.up));
+        visionTransform.rotation = Quaternion.Euler(rot);
+        Debug.DrawLine(transform.position, transform.position + ((reach + offset) * visionTransform.up));
     }
 }

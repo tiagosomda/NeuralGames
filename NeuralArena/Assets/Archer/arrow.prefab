@@ -21,6 +21,8 @@ GameObject:
   - component: {fileID: 4772792707326914}
   - component: {fileID: 212718345573762410}
   - component: {fileID: 50265423643687358}
+  - component: {fileID: 61324631656887464}
+  - component: {fileID: 114399986690747914}
   m_Layer: 0
   m_Name: arrow
   m_TagString: Untagged
@@ -61,6 +63,32 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!61 &61324631656887464
+BoxCollider2D:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1923036485709584}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Size: {x: 1.26, y: 1.2599999}
+--- !u!114 &114399986690747914
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1923036485709584}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41c1127bbab9ca14888dc9d7af40e0c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  controller: {fileID: 0}
 --- !u!212 &212718345573762410
 SpriteRenderer:
   m_ObjectHideFlags: 1

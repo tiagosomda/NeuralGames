@@ -7,53 +7,50 @@ public class Bow : Weapon {
 
     public Transform origin;
     public GameObject arrowPrefab;
-    public float actionRate;
-
-    GameObject arrow;
-    Rigidbody2D arrowBody;
-
     public float speed;
 
-    private bool canShoot;
-    private float actionTimer;
+    Rigidbody2D arrowBody;
 
-    // Use this for initialization
-    void Awake()
+    private CharacterControl gladiator;
+
+    private CharacterControl Gladiator
     {
-        arrow = Instantiate(arrowPrefab, origin.position, Quaternion.identity) as GameObject;
-        arrowBody = arrow.GetComponent<Rigidbody2D>();
-        arrow.SetActive(false);
-        canShoot = true;
+        get
+        {
+            if(gladiator == null)
+            {
+                gladiator = GetComponentInParent<CharacterControl>();
+            }
+
+            return gladiator;
+        }
     }
 
-    public void Update()
+    void Awake()
     {
-        if(!canShoot)
-        {
-            actionTimer -= Time.deltaTime * actionRate;
-
-            if(actionTimer <= 0f)
-            {
-                canShoot = true;
-                arrow.SetActive(false);
-            }
-        }
+        actionEnabled = true;
     }
 
     public override void Action()
     {
-        if (!canShoot)
+        if (!actionEnabled)
         {
             return;
         }
+        actionEnabled = false;
 
-        arrow.SetActive(true);
+
+        var arrow = Instantiate(arrowPrefab, origin.position, Quaternion.identity) as GameObject;
+        arrowBody = arrow.GetComponent<Rigidbody2D>();
+
+        //arrow.transform.SetParent(Gladiator);
+        arrow.GetComponent<WeaponCollider>().controller = Gladiator;
+        arrow.tag = gladiator.gameObject.tag;
 
         arrow.transform.position = origin.position;
         arrow.transform.rotation = origin.rotation;
         arrowBody.velocity = (speed * transform.up);
 
         actionTimer = actionRate;
-        canShoot = false;
     }
 }
