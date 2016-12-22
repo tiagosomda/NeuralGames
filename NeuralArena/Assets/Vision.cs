@@ -4,10 +4,12 @@ using UnityEngine;
 
 public class Vision : MonoBehaviour {
 
+    public float maxDegrees;
     public float degrees;
     public float reach;
+    public GameObject obj;
 
-    private LayerMask[] layer;
+    public LayerMask[] layer;
 
     public float Range
     {
@@ -18,22 +20,15 @@ public class Vision : MonoBehaviour {
 
         set
         {
-            if (value > 120)
-            {
-                degrees = 120;
-            }
-            else if (value < 20)
-            {
-                degrees = 20;
-            }
-            else
-            {
-                degrees = value;
-            }
+            var percentage = value > 1f ? 1f : value < 0f ? 0f : value;
+            degrees = maxDegrees * percentage;
         }
     }
 
     private Dictionary<LayerMask, bool> presense;
+
+    private LayerMask[] maskArray;
+    private bool[] isPresentArray;
 
     private float offset = 0.7f;
     private RaycastHit2D hit;
@@ -43,27 +38,49 @@ public class Vision : MonoBehaviour {
     public void Awake()
     {
         presense = new Dictionary<LayerMask, bool>();
-        visionTransform = Instantiate(new GameObject()).transform;
+
+        maskArray = new LayerMask[layer.Length];
+        isPresentArray = new bool[layer.Length];
+
+        for(int i = 0; i < layer.Length; i++)
+        {
+            maskArray[i] = layer[i];
+            isPresentArray[i] = false;
+        }
+
+
+        visionTransform = Instantiate(obj).transform;
+        
+        visionTransform.gameObject.name = "test";
+        visionTransform.SetParent(this.transform);
 
     }
 
     public bool IsPresent(LayerMask layer)
     {
-        if(!presense.ContainsKey(layer))
+        for (int i = 0; i < maskArray.Length; i++)
         {
-            presense.Add(layer, false);
+            if (maskArray[i] == layer)
+            {
+                return isPresentArray[i];
+            }
         }
 
-        return presense[layer];
+        return false;
     }
 
-    public void Update()
+    public void FixedUpdate()
     {
-        foreach(var l in presense.Keys)
+        for (int i = 0; i < maskArray.Length; i++)
         {
-            if(Anyone(l))
+            if (Anyone(maskArray[i]))
             {
+                isPresentArray[i] = true;
                 Debug.DrawLine(transform.position, hit.point, Color.red);
+            }
+            else if(isPresentArray[i])
+            {
+                isPresentArray[i] = false;
             }
         }
         DrawRange();
@@ -72,29 +89,33 @@ public class Vision : MonoBehaviour {
     private bool Anyone(LayerMask l)
     {
         var rot = transform.rotation.eulerAngles;
+
+        var rotPos = rot;
+        var rotNeg = rot;
+        var deg = degrees / 2;
         rot.z -= degrees / 2;
 
-        if(!presense.ContainsKey(l))
+        for (int i = 0; i < deg; i++)
         {
-            presense.Add(l, false);
-        }
-
-        if (presense[l])
-        {
-            presense[l] = false;
-        }
-
-        for (int i = 0; i < degrees; i++)
-        {
-            rot.z++;
-            visionTransform.rotation = Quaternion.Euler(rot);
-            hit = Physics2D.Raycast(visionTransform.position + (visionTransform.up * offset), visionTransform.up, reach, l);
-
+            rotPos.z++;
+            rotNeg.z--;
+            
+            //check positive side
+            visionTransform.rotation = Quaternion.Euler(rotPos);
+            hit = Physics2D.Raycast(transform.position + (visionTransform.up * offset), visionTransform.up, reach, l);
             if(hit.collider != null)
             {
-                presense[l] = true;
                 return true;
             }
+
+            //check negative side
+            visionTransform.rotation = Quaternion.Euler(rotNeg);
+            hit = Physics2D.Raycast(transform.position + (visionTransform.up * offset), visionTransform.up, reach, l);
+            if (hit.collider != null)
+            {
+                return true;
+            }
+
         }
 
         return false;

@@ -20,7 +20,7 @@ public class GeneticAlgorithm
 
         mutationProb = 0.02;
         crossoverProb = 0.5;
-        elitism = false;
+        elitism = true;
     }
 
     private GeneticAlgorithm(double mutationProbability, double crossoverProbability)

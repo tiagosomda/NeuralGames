@@ -23,9 +23,9 @@ GameObject:
   - component: {fileID: 50265423643687358}
   - component: {fileID: 61324631656887464}
   - component: {fileID: 114399986690747914}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: arrow
-  m_TagString: Untagged
+  m_TagString: Damage
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -89,6 +89,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 0}
+  gladiator: {fileID: 0}
 --- !u!212 &212718345573762410
 SpriteRenderer:
   m_ObjectHideFlags: 1

@@ -44,8 +44,9 @@ public class Bow : Weapon {
         arrowBody = arrow.GetComponent<Rigidbody2D>();
 
         //arrow.transform.SetParent(Gladiator);
-        arrow.GetComponent<WeaponCollider>().controller = Gladiator;
-        arrow.tag = gladiator.gameObject.tag;
+        var weaponCollider = arrow.GetComponent<WeaponCollider>();
+        weaponCollider.controller = Gladiator;
+        weaponCollider.gladiator = Gladiator.gameObject.transform;
 
         arrow.transform.position = origin.position;
         arrow.transform.rotation = origin.rotation;

@@ -11,7 +11,7 @@ public class GameController : MonoBehaviour {
     public Transform positions;
     public Transform gladiatorParent;
 
-    private Gladiator[] agents;
+    private AIController[] agents;
     private Transform[] startPos;
     private int simCount;
 
@@ -22,9 +22,10 @@ public class GameController : MonoBehaviour {
 
     public void Awake()
     {
+        isLearning = false;
         learner = GetComponent<Learner>();
         simCount = positions.transform.childCount;
-        agents = new Gladiator[positions.transform.childCount];
+        agents = new AIController[positions.transform.childCount];
         startPos = new Transform[positions.transform.childCount];
 
         for(int i = 0; i < simCount; i++)
@@ -32,7 +33,7 @@ public class GameController : MonoBehaviour {
             var obj = Instantiate(gladiatorPrefab);
             obj.transform.SetParent(gladiatorParent);
 
-            agents[i] = obj.GetComponent<Gladiator>();
+            agents[i] = obj.GetComponent<AIController>();
             startPos[i] = positions.transform.GetChild(i);
         }
     }
@@ -143,7 +144,8 @@ public class GameController : MonoBehaviour {
     {
         for (int i = 0; i < simCount; i++)
         {
-            agents[i].gameObject.transform.position = startPos[i].position;
+            var pos = startPos[i].position;
+            agents[i].gameObject.transform.position = pos;
         }
     }
 

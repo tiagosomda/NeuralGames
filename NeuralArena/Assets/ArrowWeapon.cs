@@ -19,6 +19,7 @@ public class ArrowWeapon : MonoBehaviour {
     // Use this for initialization
     void Awake () {
         arrow = Instantiate(weaponPrefab, origin.position, Quaternion.identity) as GameObject;
+
         arrowCollider = arrow.GetComponent<ArrowCollider>();
         weaponBody = arrow.GetComponent<Rigidbody2D>();
         arrow.SetActive(false);

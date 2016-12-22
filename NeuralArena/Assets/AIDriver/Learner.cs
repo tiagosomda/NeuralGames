@@ -86,7 +86,7 @@ public class Learner : MonoBehaviour
     {
         var AIList = new T[size];
         //look for best existing genome
-        string SaveFolder = @"E:\Dev\Projects\NeuralGames\NeuralArena\Assets\savedGenomes\";
+        string SaveFolder = @"D:\dev\AIRIVER\NeuralGames\NeuralArena\Assets";
 
         var files = Directory.GetFiles(SaveFolder);
         int max = 0;
@@ -124,7 +124,7 @@ public class Learner : MonoBehaviour
 
     public static void SaveGenome(int score, Genome genome)
     {
-        string SaveFolder = @"E:\Dev\Projects\NeuralGames\NeuralArena\Assets\savedGenomes\";
+        string SaveFolder = @"D:\dev\AIRIVER\NeuralGames\NeuralArena\Assets";
 
         string fileNameTemplate = @"score.{0}.genome";
 

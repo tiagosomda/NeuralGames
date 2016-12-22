@@ -54,18 +54,19 @@ public class CharacterControl : MonoBehaviour {
 
     public void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.tag != gameObject.tag)
+        if(collision.tag == "Damage")
         {
             var control = collision.gameObject.GetComponent<WeaponCollider>();
-            control.AddPoint(1);
-            Destroy(collision.gameObject);
+            if(control.gladiator != gameObject.transform)
+            {
+                control.AddPoint(1);
+                Destroy(collision.gameObject);
+            }
         }
     }
 
     public void AddPoint(int points)
     {
         score += points;
-
-        Debug.Log("POINTS! " + score);
     }
 }
