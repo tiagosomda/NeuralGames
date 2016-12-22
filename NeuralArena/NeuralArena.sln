@@ -1,7 +1,7 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2015
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NeuralArena", "NeuralArena.csproj", "{0B6E2597-B3E7-0F27-21F5-0A28E20175B4}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2008
+
+Project("{76654560-424B-F42F-856A-A2CEF898E8AE}") = "NeuralArena", "Assembly-CSharp.csproj", "{7D3AA07A-1D64-05A4-5040-4849A5F1C65B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,12 +9,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0B6E2597-B3E7-0F27-21F5-0A28E20175B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0B6E2597-B3E7-0F27-21F5-0A28E20175B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0B6E2597-B3E7-0F27-21F5-0A28E20175B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0B6E2597-B3E7-0F27-21F5-0A28E20175B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D3AA07A-1D64-05A4-5040-4849A5F1C65B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D3AA07A-1D64-05A4-5040-4849A5F1C65B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D3AA07A-1D64-05A4-5040-4849A5F1C65B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D3AA07A-1D64-05A4-5040-4849A5F1C65B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
 	EndGlobalSection
 EndGlobal
