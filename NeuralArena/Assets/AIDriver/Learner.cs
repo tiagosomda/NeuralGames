@@ -14,6 +14,19 @@ public class Learner : MonoBehaviour
     public int maxIterations = 20000;
     public int iteration;
 
+    public static string genomeFolder = @".\savedGenomes";
+    public static string GenomeFolder {
+        get
+        {
+            if(!Directory.Exists(genomeFolder))
+            {
+                Directory.CreateDirectory(genomeFolder);
+            }
+
+            return genomeFolder;
+        }
+    }
+
     private GeneticAlgorithm geneticAlgorithm;
     private List<Brain> brainArr;
     private double prevMaxFitness = -1;
@@ -86,16 +99,15 @@ public class Learner : MonoBehaviour
     {
         var AIList = new T[size];
         //look for best existing genome
-        string SaveFolder = @"D:\dev\AIRIVER\NeuralGames\NeuralArena\Assets";
 
-        var files = Directory.GetFiles(SaveFolder);
+        var files = Directory.GetFiles(GenomeFolder);
         int max = 0;
         var bestGenome = "";
 
         foreach (var f in files)
         {
 
-            var filename = f.Remove(0, SaveFolder.Length);
+            var filename = f.Remove(0, GenomeFolder.Length);
             var parts = filename.Split('.');
             var score = int.Parse(parts[1]);
 
@@ -124,15 +136,11 @@ public class Learner : MonoBehaviour
 
     public static void SaveGenome(int score, Genome genome)
     {
-        string SaveFolder = @"D:\dev\AIRIVER\NeuralGames\NeuralArena\Assets";
-
         string fileNameTemplate = @"score.{0}.genome";
 
-        string filePath = Path.Combine(SaveFolder, string.Format(fileNameTemplate, score - 1)); 
+        string filePath = Path.Combine(GenomeFolder, string.Format(fileNameTemplate, score - 1));
 
-        List<string> files = new List<string>(Directory.GetFiles(SaveFolder, string.Format(filePath, "*")));
-
-        files.ForEach(file => TryDelete(file));
+        TryDelete(filePath);
 
         File.WriteAllText(filePath, SerializeGenome(genome));
     }
