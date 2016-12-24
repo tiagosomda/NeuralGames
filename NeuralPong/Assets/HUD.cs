@@ -6,6 +6,8 @@ using UnityEngine;
 public class HUD : MonoBehaviour {
     public Text scoreP1;
     public Text scoreP2;
+    public Text winScreenP1;
+    public Text winScreenP2;
 
     public Text restartButton;
 
@@ -15,6 +17,9 @@ public class HUD : MonoBehaviour {
     {
         scoreP1.text = p1.ToString();
         scoreP2.text = p2.ToString();
+
+        winScreenP1.text = "Player One : " + scoreP1.text;
+        winScreenP2.text = "Player Two : " + scoreP2.text;
     }
 
     public void SetWinText(string txt)
@@ -22,20 +27,4 @@ public class HUD : MonoBehaviour {
         WinText.text = txt;
     }
 
-    public void ShowInitialScreen()
-    {
-        WinText.gameObject.SetActive(false);
-        restartButton.text = "START GAME";
-    }
-
-    public void ShowGameScreen()
-    {
-        WinText.gameObject.SetActive(false);
-        restartButton.text = "RESTART";
-    }
-
-    public void ShowWinScreen(bool show)
-    {
-        WinText.gameObject.SetActive(show);
-    }
 }

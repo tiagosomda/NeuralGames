@@ -7,20 +7,24 @@ public class GameManager : MonoBehaviour {
     public int winScore = 10;
     public HUD hud;
     public GameObject gameEnv;
+    public  BallControl theBall;
+
+
+    public GameObject startScreen;
+    public GameObject gameScreen;
+    public GameObject winScreen;
      
     private int PlayerScore1 = 0;
     private int PlayerScore2 = 0;
-    private BallControl theBall;
 
 
     private bool isPlaying;
     // Use this for initialization
-    void Start () {
-        theBall = GameObject.FindGameObjectWithTag("Ball").GetComponent<BallControl>();
+    void Awake () {
+        //theBall = GameObject.FindGameObjectWithTag("Ball").GetComponent<BallControl>();
 
         isPlaying = false;
-        gameEnv.SetActive(false);
-        hud.ShowInitialScreen();
+        startScreen.SetActive(true);
     }
 
     public void Update()
@@ -57,7 +61,8 @@ public class GameManager : MonoBehaviour {
         var winText = PlayerScore1 > PlayerScore2 ? "PLAYER ONE WINS" : "PLAYER TWO WINS";
         theBall.ResetBall();
         hud.SetWinText(winText);
-        hud.ShowWinScreen(true);
+        gameScreen.SetActive(false);
+        winScreen.SetActive(true);
         isPlaying = false;
     }
 
@@ -65,10 +70,12 @@ public class GameManager : MonoBehaviour {
     {
         if(isPlaying == false)
         {
-            hud.ShowGameScreen();
             isPlaying = true;
+            startScreen.SetActive(false);
         }
 
+        winScreen.SetActive(false);
+        gameScreen.SetActive(true);
         PlayerScore1 = PlayerScore2 = 0;
         hud.UpdateScore(PlayerScore1, PlayerScore2);
         gameEnv.SetActive(true);
