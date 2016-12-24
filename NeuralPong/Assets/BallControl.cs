@@ -6,10 +6,12 @@ public class BallControl : MonoBehaviour {
 
     private Rigidbody2D rb2d;
     private Vector2 vel;
+    private TrailRenderer trail;
 
     // Use this for initialization
     void Awake () {
         rb2d = GetComponent<Rigidbody2D>();
+        trail = GetComponent<TrailRenderer>();
         //Invoke("GoBall", 2.0f);
     }
 	
@@ -28,6 +30,7 @@ public class BallControl : MonoBehaviour {
 
     public void ResetBall()
     {
+        trail.Clear();
         vel.y = 0;
         vel.x = 0;
         rb2d.velocity = vel;
@@ -36,7 +39,7 @@ public class BallControl : MonoBehaviour {
 
     public void RelaunchBall()
     {
-        ResetBall();
+        Invoke("ResetBall", 1.0f);
         Invoke("GoBall", 1.0f);
     }
 

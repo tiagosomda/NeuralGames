@@ -70,6 +70,7 @@ public class GameManager : MonoBehaviour {
         }
 
         PlayerScore1 = PlayerScore2 = 0;
+        hud.UpdateScore(PlayerScore1, PlayerScore2);
         gameEnv.SetActive(true);
         theBall.RelaunchBall();
     }
